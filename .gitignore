@@ -1,0 +1,14 @@
+# Veri ve modeller git'e girmez (§6.4). Checkpoint paylaşımı: scripts/share_checkpoint.py
+data/
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+.DS_Store
+.gradio/
