@@ -27,6 +27,7 @@ SMALL_FILES = [
     "metadata/dish_metadata_cafe2.csv",
     "metadata/ingredients_metadata.csv",
     "dish_ids/README",
+    "dish_ids/dish_ids_cafe1.txt",
     "dish_ids/splits/rgb_train_ids.txt",
     "dish_ids/splits/rgb_test_ids.txt",
     "dish_ids/splits/depth_train_ids.txt",
