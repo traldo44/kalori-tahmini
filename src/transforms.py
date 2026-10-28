@@ -9,6 +9,9 @@ KALORİ (Nutrition5k) — ölçeği değiştiren artırma YASAK:
     224×224'e küçültülür (640×480 → hafif yatay sıkışma; tüm görüntülere aynı uygulandığı için sorun değil).
 
 SINIFLANDIRMA (Food-101) — ölçek önemli değil, standart artırmaların hepsi serbest.
+
+Normalizasyon varsayılanı ImageNet ortalama/std; ön eğitimi farklı normalize edilmiş omurgalarda (ör. ViT: 0,5/0,5)
+eğitim betikleri modelin kendi değerlerini (timm pretrained_cfg) mean/std olarak geçirir.
 """
 import random
 
@@ -40,7 +43,7 @@ def crop_to_aspect(img: Image.Image, aspect=N5K_ASPECT) -> Image.Image:
     return img.crop((0, top, w, top + new_h))
 
 
-def calorie_transform(train: bool, size=IMG_SIZE):
+def calorie_transform(train: bool, size=IMG_SIZE, mean=IMAGENET_MEAN, std=IMAGENET_STD):
     steps = [T.Resize((size, size)), T.ToTensor()]
     if train:
         steps += [
@@ -49,13 +52,13 @@ def calorie_transform(train: bool, size=IMG_SIZE):
             RandomRot90(),
             T.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.02),
         ]
-    steps.append(T.Normalize(IMAGENET_MEAN, IMAGENET_STD))
+    steps.append(T.Normalize(mean, std))
     return T.Compose(steps)
 
 
-def classification_transform(train: bool, size=IMG_SIZE):
+def classification_transform(train: bool, size=IMG_SIZE, mean=IMAGENET_MEAN, std=IMAGENET_STD):
     if train:
         steps = [T.RandomResizedCrop(size), T.RandomHorizontalFlip(), T.RandAugment()]
     else:
         steps = [T.Resize(int(size * 256 / 224)), T.CenterCrop(size)]
-    return T.Compose(steps + [T.ToTensor(), T.Normalize(IMAGENET_MEAN, IMAGENET_STD)])
+    return T.Compose(steps + [T.ToTensor(), T.Normalize(mean, std)])
