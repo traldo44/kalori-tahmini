@@ -144,28 +144,18 @@ uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python -r requi
 .venv/bin/python -m pytest -q                         # hepsi geçmeli
 ```
 
-**Kaggle'da kurulum** (bir kez):
+**Kaggle'da kurulum** (bir kez, kişi başı):
 
 1. kaggle.com → Settings → **Phone verification** (GPU ve internet için şart)
-2. GitHub'da yalnızca bu repoya erişimi olan bir token açın: Settings → Developer settings → **Fine-grained tokens** → Repository access: `kalori-tahmini` → Permissions: **Contents: Read and write**
-3. Kaggle notebook'ta: Add-ons → **Secrets** → `GH_TOKEN` adıyla token'ı ekleyin
+2. GitHub token'ı: [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new) → Repository access: **Only select repositories** → `kalori-tahmini` → Permissions → Repository permissions → **Contents: Read and write**. (Repo sahibi olmayan kişi bu listede repoyu göremezse **classic token** açsın: [github.com/settings/tokens/new](https://github.com/settings/tokens/new), yetki: `repo`.)
+3. Kaggle → Create → New Notebook → File → **Import Notebook** → `notebooks/00_kaggle_kurulum.ipynb`
 4. Notebook ayarları: Accelerator **GPU T4 x2** · Internet **On** · Environment **"Pin to original environment"** (paket sürümleri oturumlar arasında değişmesin)
+5. Add-ons → **Secrets** → Add secret: adı `GH_TOKEN`, değeri token → bu notebook için işaretleyin
+6. İlk kod hücresinde adınızı/e-postanızı yazın → **Run All**. Kontrol hücrelerinin hepsi ✓ ise kurulum tamam.
 
-Her notebook'un ilk hücresi:
+Her yeni notebook'un başına `00_kaggle_kurulum.ipynb`'nin ilk iki kod hücresini (Kurulum + Veri) kopyalayın. Token hiçbir dosyaya yazılmaz, yalnızca oturumun hafızasında durur. Veri `/tmp/kalori-data`'ya iner; `/kaggle/working`'e girmediği için notebook çıktısını şişirmez. Her oturumda yeniden indirmek birkaç dakika sürer.
 
-```python
-import os
-from kaggle_secrets import UserSecretsClient
-os.environ["GH_TOKEN"] = token = UserSecretsClient().get_secret("GH_TOKEN")
-!git clone -q https://{token}@github.com/traldo44/kalori-tahmini.git
-%cd kalori-tahmini
-!git config user.name "Ad Soyad" && git config user.email "eposta@ornek.com"
-!python scripts/download_nutrition5k.py --out /kaggle/working/data/nutrition5k
-os.environ["KALORI_DATA"] = "/kaggle/working/data"
-os.environ["KALORI_OWNER"] = "ad_soyad"          # results.csv'deki owner sütunu
-```
-
-Kaggle'da torch/torchvision/timm zaten kurulu; `pip install -r requirements.txt` **yapmayın** (torch'u yeniden kurar). Eksik paket çıkarsa yalnızca onu kurun. Nutrition5k'yı her oturumda indirmek birkaç dakika sürer. İsterseniz ilk indirmeden sonra notebook çıktısını "New Dataset" olarak kaydedip `KALORI_DATA`'yı `/kaggle/input/...`'a çevirebilirsiniz.
+Kaggle'da torch/torchvision/timm zaten kurulu; `pip install -r requirements.txt` **yapmayın** (torch'u yeniden kurar). Eksik paket çıkarsa yalnızca onu kurun.
 
 ### 5.2 Repo yapısı
 
