@@ -63,11 +63,18 @@ Fotoğraf → Ön işleme (224 px, normalizasyon, augmentation)
 5. Kalori en çok **yağ (0,88)** ve **protein (0,85)** ile ilişkili, kütleyle 0,74. Bu, çok görevli başlığın (Adım 12) gerekçesi.
 6. **Tablo 3 sınırları:** düşük < 116,1 ≤ orta < 313,7 ≤ yüksek kcal. `CALORIE_BIN_EDGES` olarak sabitlendi; bir test bunların değişmediğini kontrol ediyor.
 
+### Food-101 EDA bulguları (Adım 7, `notebooks/02_eda_food101.ipynb`)
+
+1. **Sızıntı:** 9 test görüntüsünün train/val'de birebir ya da neredeyse aynı kopyası vardı. Train/val tarafı `FOOD101_EXCLUDE` ile çıkarıldı; test'e dokunulmadı.
+2. **Çelişkili etiket:** Aynı fotoğraf hem `omelette` hem `pancakes` etiketliydi; ikisi de çıkarıldı.
+3. **Etiket gürültüsü:** Food-101'in train'i bilerek temizlenmemiş. 10 komşusunun hiçbiri aynı etiketi taşımayan görüntü oranı train'de %8,0, temiz test'te %5,5. Hangisinin gerçekten yanlış olduğu kesin olmadığı için çıkarılmıyor; label smoothing (0,1) koruma sağlar.
+4. **Naif baseline (Adım 8):** En sık sınıf → doğruluk %4 (1/25), macro-F1 0,003. Kalori: ortalama tahmin → test MAE **168,4** [158,0–180,1] kcal, PMAE %65,9.
+
 ### Hedeflerimiz (Nutrition5k test, yalnızca RGB)
 
 | Referans | Kalori MAE (kcal) | PMAE (%) | Bizim için anlamı |
 | --- | --- | --- | --- |
-| Ortalama tahmin baseline'ı | 150,8 | 60,2 | Mutlaka geçilmeli |
+| Ortalama tahmin baseline'ı | 150,8 | 60,2 | Mutlaka geçilmeli. **Bizim ölçümümüz: 168,4 / %65,9** (Açık konular'a bakın) |
 | ResNet-50, ImageNet ön eğitimli (Andrade 2025) | 117,4 | 46,6 | İlk derin model bu civarda çıkabilir |
 | En iyi sıfır-atış VLM (Gemini 3.0 Flash) | 80,7 | — | **1. hedef** |
 | Orijinal Nutrition5k RGB baseline'ı (JFT ön eğitimli) | 70,6 | 26,1 | **2. hedef** |
@@ -83,15 +90,15 @@ Fotoğraf → Ön işleme (224 px, normalizasyon, augmentation)
 | 1 | Veri seti seçimi ve gerekçesi | ✅ Tamamlandı |
 | — | Platform seçimi | ✅ Kaggle (eğitim) + Mac. Kaggle kurulumu ✅ (repo okuma/yazma doğrulandı) |
 | 2 | Kurulum, veri indirme | ✅ Mac'te: repo, `metrics.py`, veri okuyucular, testler; Nutrition5k indirildi |
-| 2 | Temizlik, EDA | Nutrition5k ✅ (`notebooks/01_eda_nutrition5k.ipynb`, §2'deki EDA bulguları) · Food-101 ⬜ |
-| 3 | Baseline modeller | ⬜ Gün 2–3 |
+| 2 | Temizlik, EDA | ✅ Nutrition5k (`notebooks/01_eda_nutrition5k.ipynb`) · Food-101 (`notebooks/02_eda_food101.ipynb`); bulgular §2'de |
+| 3 | Baseline modeller | Naif ✅ (Adım 8, `src/baselines.py`) · Klasik ML ⬜ (Adım 9) |
 | 3 | CNN / Transformer eğitimi | ⬜ Gün 3–5 |
 | 4 | Değerlendirme + VLM referansı | ⬜ Gün 5–6 |
 | 5 | İyileştirme ve ablation | ⬜ Gün 6–8 |
 | — | Tablolar, figürler, kodun temizlenmesi | ⬜ Gün 8–9 |
 | 6–7 | Rapor ve sunum | ⬜ Geliştirmeden sonra |
 
-**Kısaca:** Repo kuruldu; ortak kod (metrikler, veri okuyucular, dönüşümler, demo iskeleti) yazıldı ve testleri geçiyor. Nutrition5k Mac'e indirildi. Kaggle kurulumu tamam. Nutrition5k EDA'sı bitti (Adım 6). Sıradaki adımlar: **Adım 5** (Food-101'i indir) → **Adım 7** (Food-101 EDA) → **Adım 8** (naif baseline'lar).
+**Kısaca:** Repo kuruldu; ortak kod (metrikler, veri okuyucular, dönüşümler, demo iskeleti) yazıldı ve testleri geçiyor. Nutrition5k Mac'e indirildi. Kaggle kurulumu tamam. Adım 5–8 bitti: iki veri setinin EDA'sı, Food-101 alt kümesi (GitHub Release'te) ve naif baseline'lar (`results.csv`). Sıradaki: **Adım 9**, klasik ML (HOG + renk → SVM/RF; CNN gömmeleri → Ridge/XGBoost) → **Kontrol noktası 1**.
 
 ### Açık konular (karar bekliyor)
 
@@ -101,6 +108,7 @@ Fotoğraf → Ön işleme (224 px, normalizasyon, augmentation)
 | Teslim tarihi | Belgede yok. Gün 1'in tarihini ve teslim gününü §4'e yazın |
 | İş bölümü | Adım 5'ten sonra iki bağımsız hat var: **kalori** (Nutrition5k EDA → kalori modelleri → iyileştirme) ve **sınıflandırma** (Food-101 → klasik ML → CNN/ViT → VLM betiği). İki kişi paralel çalışırsa süre ve GPU kotası ikiye katlanır |
 | VLM seçimi ve bütçe | Hangi model, API anahtarı kimde? Gemini'nin ücretsiz katmanı 300 tabak için muhtemelen yeter |
+| **Literatürdeki 150,8 kcal'lik ortalama baseline'ı tekrarlanamıyor** | Bizim 507 tabaklık test kümemizde ortalama tahmin 168,4 kcal MAE veriyor. Test kümesinin kendi medyanını bilen (hileli) en iyi sabit tahmin bile 167,0. Yani o sayı farklı bir test kümesinden ya da protokolden geliyor. Literatürü toplayan kişi kaynağı kontrol etmeli: hangi bölme, kaç tabak? Aynı soru §2'deki diğer referans sayılar için de geçerli. Tablo 2'de baseline satırı olarak kendi ölçümümüz kullanılır |
 | Kalori hedefi gerçekçi mi? | "80,7 kcal'in altı" iddialı: ImageNet ön eğitimli ViT literatürde 88 kcal'de kalmış. Tutmazsa raporda dürüstçe yazılır |
 
 ---
@@ -132,9 +140,9 @@ Adımlar sırayla yapılır; her adımın bir çıktısı ve bir "bitti" kriteri
 | 19 | 9 | Demo: fotoğraf yükle → kcal (`app.py` iskeleti hazır) + kendi fotoğraflarımızla test (§7 Faz 4) | Çalışan demo, kısa bir video kaydı, `own_photos` satırları |
 | 20 | 9 | Toparlama: figürlerin son hali, kod temizliği, README | `main` dalında baştan sona çalışan kod. **Kontrol noktası 3** |
 
-**Durum (28 Ekim):** Adım 1, 2, 3, 4, 6 ✅ · Adım 5: sınıf listesi ✅ (`src/data.py`), indirme ⏳
+**Durum (28 Ekim):** Adım 1–8 ✅
 
-**Sıradaki adım:** Adım 5 ve 7, ardından 8.
+**Sıradaki adım:** Adım 9 (klasik ML) → Kontrol noktası 1.
 
 ---
 
@@ -177,7 +185,7 @@ kalori-tahmini/
 ├── notebooks/
 │   ├── 00_kaggle_kurulum.ipynb   ← Kaggle'ın ilk hücreleri (§5.1)  ✅
 │   ├── 01_eda_nutrition5k.ipynb  ✅
-│   ├── 02_eda_food101.ipynb
+│   ├── 02_eda_food101.ipynb      ✅
 │   └── ...
 ├── src/
 │   ├── config.py          ← ORTAK sabitler (tohum, boyut, yollar, cihaz)       ✅
@@ -187,6 +195,7 @@ kalori-tahmini/
 │   ├── results.py         ← results.csv'ye satır ekleme, tahmin kaydetme        ✅
 │   ├── plot_style.py      ← ORTAK grafik stili: tüm figürler `apply()` ile      ✅
 │   ├── compare.py         ← iki modeli eşleştirilmiş bootstrap ile karşılaştır  ✅
+│   ├── baselines.py       ← naif baseline'lar (Adım 8)                          ✅
 │   ├── models.py          ← omurga + başlıklar, checkpoint biçimi, tek foto tahmini ✅ (temel)
 │   ├── eval_own_photos.py ← kendi fotoğraflarımızla dış test (§7, Faz 4)       ✅
 │   ├── train_cls.py       ← sınıflandırma eğitimi                               ⬜
@@ -194,6 +203,7 @@ kalori-tahmini/
 │   └── vlm_eval.py        ← VLM sıfır-atış referansı                            ⬜
 ├── scripts/
 │   ├── download_nutrition5k.py  ← gsutil'siz indirme (Mac ve Kaggle)           ✅
+│   ├── get_food101.py           ← Food-101 25 sınıflık alt küme: build / fetch   ✅
 │   └── share_checkpoint.py      ← checkpoint'leri GitHub Release ile paylaş (§6.4) ✅
 ├── tests/                 ← python -m pytest -q
 ├── app.py                 ← Gradio demosu (Adım 19)                            ✅ (iskelet)
@@ -201,7 +211,7 @@ kalori-tahmini/
 ├── results/
 │   ├── results.csv        ← ORTAK: her deneyin sonucu buraya
 │   ├── preds/             ← her modelin test tahminleri (git'te)
-│   ├── data_card_nutrition5k.csv ← veri kartı (EDA)
+│   ├── data_card_nutrition5k.csv, data_card_food101.csv ← veri kartları (EDA)
 │   └── figures/
 └── checkpoints/           ← git'e EKLENMEZ
 ```
@@ -231,13 +241,16 @@ Yapı: `data/nutrition5k/realsense_overhead/dish_XXXXXXXXXX/rgb.png` (640×480),
 
 ### 5.4 Food-101 (alt küme)
 
-```python
-from torchvision.datasets import Food101
-train = Food101(root="data/food101", split="train", download=True)  # ~5 GB, bir kez indirilir
-test  = Food101(root="data/food101", split="test",  download=True)
+Tam Food-101 5 GB; bize 25 sınıf lazım. Alt küme bir kez çıkarıldı, görüntülerin kısa kenarı 256 px'e küçültüldü (eğitim 224 px kullanıyor; okuma çok hızlanır) ve repo'nun `data` Release'ine kondu. Herkes yalnızca alt kümeyi indirir:
+
+```bash
+python scripts/get_food101.py fetch                          # Mac → data/food101/
+python scripts/get_food101.py fetch --out /tmp/kalori-data   # Kaggle (kurulum notebook'u bunu yapıyor)
 ```
 
-Alt küme **25 sınıf** olarak sabitlendi: `src/data.py` → `FOOD101_CLASSES`. Liste sonradan değişirse önceki sınıflandırma sonuçları karşılaştırılamaz hale gelir; ilk sonuçtan önce itirazınız varsa şimdi değiştirin. Listede bilerek karışabilir çiftler var (bolognese/carbonara, caesar/greek salad, pancakes/waffles); karışıklık matrisi ve hata analizi için iyi malzeme olur. Sınıf başına 750 eğitim ve 250 test görüntüsü → 18.750 eğitim / 6.250 test. Okuyucu: `Food101Subset("train" | "test", transform)`.
+Alt küme **25 sınıf** olarak sabitlendi: `src/data.py` → `FOOD101_CLASSES`. Liste sonradan değişirse önceki sınıflandırma sonuçları karşılaştırılamaz hale gelir. Listede bilerek karışabilir çiftler var (bolognese/carbonara, caesar/greek salad, pancakes/waffles); karışıklık matrisi ve hata analizi için iyi malzeme olur.
+
+**Bölmeler:** `Food101Subset("train" | "val" | "test", transform)`. Resmi train'den her sınıfın %10'u sabit tohumla val'e ayrılır → sınıf başına **675 train / 75 val / 250 test**. EDA'da bulunan 11 sorunlu görüntü train/val'den çıkarıldı (`FOOD101_EXCLUDE`) → son sayılar **16.865 train / 1.874 val / 6.250 test**. Food-101'in resmi train'i **bilerek temizlenmemiştir** (etiket gürültüsü var, bkz. EDA); test elle temizlenmiştir.
 
 ### 5.5 Gün 1 bitiş kriterleri
 
@@ -245,7 +258,7 @@ Alt küme **25 sınıf** olarak sabitlendi: `src/data.py` → `FOOD101_CLASSES`.
 - [x] Repo açıldı, bu dosya `README.md` olarak eklendi
 - [x] `src/metrics.py` yazıldı (§6.2) ve tüm deneyler onu kullanıyor
 - [x] Nutrition5k RGB görüntüleri, metadata ve bölmeler indirildi; kullanılabilir train/test tabak sayıları not edildi
-- [ ] Food-101 alt kümesi hazır (sınıf listesi ✅, indirme ⏳)
+- [x] Food-101 alt kümesi hazır (`scripts/get_food101.py fetch`)
 
 ---
 
@@ -451,6 +464,7 @@ Bu dosyanın kapsamı dışında; bilgi için:
 
 | Tarih | Kim | Son tamamlanan adım | Yarım kalan iş / sıradaki adım | Notlar (değişen ayarlar, sorunlar) |
 | --- | --- | --- | --- | --- |
+| 2026-10-28 | traldo | Adım 5, 7, 8: Food-101 alt kümesi + EDA, naif baseline'lar | Adım 9: klasik ML | Food-101 alt kümesi `data` Release'inde (662 MB; `get_food101.py fetch`, kesintide kaldığı yerden devam eder). `FOOD101_EXCLUDE` 11 görüntü (9 test sızıntısı + 1 çelişkili çift). Naif baseline'lar `results.csv`'de: test MAE 168,4 (ortalama) / 167,3 (medyan). Literatürdeki 150,8'lik baseline tekrarlanamadı (§3 Açık konular) |
 | 2026-10-28 | traldo | Adım 6: Nutrition5k EDA | Adım 5: Food-101 indir → Adım 7: Food-101 EDA → Adım 8 | `BAD_DISHES` 3 tabak; kullanılabilir 2472 train / 280 val / 507 test. Baseline hedefi **ham kcal + L1** (log1p ablation'da). `CALORIE_BIN_EDGES` sabitlendi. Ortak grafik stili: `src/plot_style.py`. Bulgular §2'de |
 | 2026-10-28 | traldo | Adım 2, 3, 4 (+ Adım 1 Mac tarafı, Adım 5 sınıf listesi) | Adım 5: Food-101 indir → Adım 6: Nutrition5k EDA | **Yeni:** zaman gruplu val ayrımı, kalori için ölçeksiz artırma, bootstrap güven aralıkları, `src.compare`, kendi fotoğraf testi, demo iskeleti, checkpoint paylaşımı. Food-101 25 sınıf. `BAD_DISHES`'ta 1 tabak. Kullanılabilir veri: 2476 train / 278 val / 507 test. Kaggle kurulumu tamam (classic token; `notebooks/00_kaggle_kurulum.ipynb`). "Açık konular" tablosuna bakın (§3) |
 | 2026-10-24 | — | Planlama ve literatür bitti | Adım 1: platform seçimi | Kod tarafında henüz bir şey yok |

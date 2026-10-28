@@ -1,0 +1,4 @@
+,train,val,test
+görüntü,16865,1874,6250
+sınıf başına,675 (−çıkarılanlar),75 (−çıkarılanlar),250
+kaynak,resmi train (temizlenmemiş),resmi train (temizlenmemiş),resmi test (elle temizlenmiş)
