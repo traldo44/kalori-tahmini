@@ -72,7 +72,7 @@ Fotoğraf → Ön işleme (224 px, normalizasyon, augmentation)
 | --- | --- | --- |
 | 0 | Literatür taraması (39 makale) | ✅ Tamamlandı |
 | 1 | Veri seti seçimi ve gerekçesi | ✅ Tamamlandı |
-| — | Platform seçimi | ✅ Kaggle (eğitim) + Mac. Kaggle hesabı/kurulumu ⏳ |
+| — | Platform seçimi | ✅ Kaggle (eğitim) + Mac. Kaggle kurulumu ✅ (repo okuma/yazma doğrulandı) |
 | 2 | Kurulum, veri indirme | ✅ Mac'te: repo, `metrics.py`, veri okuyucular, testler; Nutrition5k indirildi |
 | 2 | Temizlik, EDA | ⬜ Gün 1–2 (1 hatalı tabak şimdiden bulundu, `src/data.py` → `BAD_DISHES`) |
 | 3 | Baseline modeller | ⬜ Gün 2–3 |
@@ -82,7 +82,7 @@ Fotoğraf → Ön işleme (224 px, normalizasyon, augmentation)
 | — | Tablolar, figürler, kodun temizlenmesi | ⬜ Gün 8–9 |
 | 6–7 | Rapor ve sunum | ⬜ Geliştirmeden sonra |
 
-**Kısaca:** Repo kuruldu; ortak kod (metrikler, veri okuyucular, dönüşümler, demo iskeleti) yazıldı ve testleri geçiyor. Nutrition5k Mac'e indirildi. Sıradaki adımlar: **Kaggle kurulumu (§5.1)**, **Adım 5** (Food-101'i indir) ve **Adım 6** (Nutrition5k EDA).
+**Kısaca:** Repo kuruldu; ortak kod (metrikler, veri okuyucular, dönüşümler, demo iskeleti) yazıldı ve testleri geçiyor. Nutrition5k Mac'e indirildi. Kaggle kurulumu tamam. Sıradaki adımlar: **Adım 5** (Food-101'i indir) ve **Adım 6** (Nutrition5k EDA).
 
 ### Açık konular (karar bekliyor)
 
@@ -123,9 +123,9 @@ Adımlar sırayla yapılır; her adımın bir çıktısı ve bir "bitti" kriteri
 | 19 | 9 | Demo: fotoğraf yükle → kcal (`app.py` iskeleti hazır) + kendi fotoğraflarımızla test (§7 Faz 4) | Çalışan demo, kısa bir video kaydı, `own_photos` satırları |
 | 20 | 9 | Toparlama: figürlerin son hali, kod temizliği, README | `main` dalında baştan sona çalışan kod. **Kontrol noktası 3** |
 
-**Durum (28 Ekim):** Adım 2, 3, 4 ✅ · Adım 1: Mac ✅, Kaggle ⏳ · Adım 5: sınıf listesi ✅ (`src/data.py`), indirme ⏳
+**Durum (28 Ekim):** Adım 1, 2, 3, 4 ✅ · Adım 5: sınıf listesi ✅ (`src/data.py`), indirme ⏳
 
-**Sıradaki adım:** Kaggle kurulumu (§5.1), ardından Adım 5 ve 6.
+**Sıradaki adım:** Adım 5 ve 6.
 
 ---
 
@@ -147,7 +147,7 @@ uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python -r requi
 **Kaggle'da kurulum** (bir kez, kişi başı):
 
 1. kaggle.com → Settings → **Phone verification** (GPU ve internet için şart)
-2. GitHub token'ı: [github.com/settings/personal-access-tokens/new](https://github.com/settings/personal-access-tokens/new) → Repository access: **Only select repositories** → `kalori-tahmini` → Permissions → Repository permissions → **Contents: Read and write**. (Repo sahibi olmayan kişi bu listede repoyu göremezse **classic token** açsın: [github.com/settings/tokens/new](https://github.com/settings/tokens/new), yetki: `repo`.)
+2. GitHub token'ı (**classic**): [github.com/settings/tokens/new](https://github.com/settings/tokens/new) → Note: `kaggle` · Expiration: 90 days · scope: **`repo`** → Generate token → `ghp_...` ile başlayan anahtarı kopyalayın. (Fine-grained token denendi; yalnızca okuma izni verdi ve push 403 hatası aldı.) Classic token hesabınızdaki tüm repolara erişir; yalnızca Kaggle Secrets'a yapıştırın.
 3. Kaggle → Create → New Notebook → File → **Import Notebook** → `notebooks/00_kaggle_kurulum.ipynb`
 4. Notebook ayarları: Accelerator **GPU T4 x2** · Internet **On** · Environment **"Pin to original environment"** (paket sürümleri oturumlar arasında değişmesin)
 5. Add-ons → **Secrets** → Add secret: adı `GH_TOKEN`, değeri token → bu notebook için işaretleyin
@@ -229,7 +229,7 @@ Alt küme **25 sınıf** olarak sabitlendi: `src/data.py` → `FOOD101_CLASSES`.
 
 ### 5.5 Gün 1 bitiş kriterleri
 
-- [x] Platform seçildi ve §3'e yazıldı (Kaggle hesabı/kurulumu ⏳)
+- [x] Platform seçildi ve §3'e yazıldı; Kaggle kurulumu tamam
 - [x] Repo açıldı, bu dosya `README.md` olarak eklendi
 - [x] `src/metrics.py` yazıldı (§6.2) ve tüm deneyler onu kullanıyor
 - [x] Nutrition5k RGB görüntüleri, metadata ve bölmeler indirildi; kullanılabilir train/test tabak sayıları not edildi
@@ -439,7 +439,7 @@ Bu dosyanın kapsamı dışında; bilgi için:
 
 | Tarih | Kim | Son tamamlanan adım | Yarım kalan iş / sıradaki adım | Notlar (değişen ayarlar, sorunlar) |
 | --- | --- | --- | --- | --- |
-| 2026-10-28 | traldo | Adım 2, 3, 4 (+ Adım 1 Mac tarafı, Adım 5 sınıf listesi) | Kaggle kurulumu (§5.1) → Adım 5: Food-101 indir → Adım 6: Nutrition5k EDA | **Yeni:** zaman gruplu val ayrımı, kalori için ölçeksiz artırma, bootstrap güven aralıkları, `src.compare`, kendi fotoğraf testi, demo iskeleti, checkpoint paylaşımı. Food-101 25 sınıf. `BAD_DISHES`'ta 1 tabak. Kullanılabilir veri: 2476 train / 278 val / 507 test. "Açık konular" tablosuna bakın (§3) |
+| 2026-10-28 | traldo | Adım 2, 3, 4 (+ Adım 1 Mac tarafı, Adım 5 sınıf listesi) | Adım 5: Food-101 indir → Adım 6: Nutrition5k EDA | **Yeni:** zaman gruplu val ayrımı, kalori için ölçeksiz artırma, bootstrap güven aralıkları, `src.compare`, kendi fotoğraf testi, demo iskeleti, checkpoint paylaşımı. Food-101 25 sınıf. `BAD_DISHES`'ta 1 tabak. Kullanılabilir veri: 2476 train / 278 val / 507 test. Kaggle kurulumu tamam (classic token; `notebooks/00_kaggle_kurulum.ipynb`). "Açık konular" tablosuna bakın (§3) |
 | 2026-10-24 | — | Planlama ve literatür bitti | Adım 1: platform seçimi | Kod tarafında henüz bir şey yok |
 
 ---
