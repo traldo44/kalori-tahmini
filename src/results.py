@@ -29,6 +29,11 @@ def log_result(task, model, config, split, metrics, notes="", owner=None, path=N
         writer.writerow(row)
 
 
+def _plain(v):
+    """numpy sayısını düz Python sayısına çevirir (sınıf etiketleri int kalır, kcal float)."""
+    return v.item() if hasattr(v, "item") else v
+
+
 def save_preds(model, ids, y_true, y_pred, split="test", path=None):
     """results/preds/<model>.csv (test) veya <model>_<split>.csv: id, y_true, y_pred."""
     name = model if split == "test" else f"{model}_{split}"
@@ -36,5 +41,5 @@ def save_preds(model, ids, y_true, y_pred, split="test", path=None):
     with open(path, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(["id", "y_true", "y_pred"])
-        writer.writerows(zip(ids, map(float, y_true), map(float, y_pred)))
+        writer.writerows(zip(ids, map(_plain, y_true), map(_plain, y_pred)))
     return path

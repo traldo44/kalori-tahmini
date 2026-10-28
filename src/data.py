@@ -128,20 +128,49 @@ FOOD101_CLASSES = [
 ]
 
 
+# Food-101 EDA'sında bulunan ve train/val'den çıkarılan görüntüler (test'e dokunulmaz).
+FOOD101_EXCLUDE = {
+    # Test görüntüsünün train/val'de birebir ya da neredeyse aynı kopyası (gömme benzerliği ≥ 0,98) → sızıntı
+    "hot_dog/410713": "test hot_dog/413426 ile neredeyse aynı (0,995)",
+    "lasagna/499859": "test lasagna/499765 ile birebir aynı",
+    "omelette/1748616": "test omelette/1600856 ile neredeyse aynı (0,986)",
+    "pancakes/85516": "test pancakes/92527 ile birebir aynı",
+    "spaghetti_carbonara/1348593": "test spaghetti_carbonara/1349091 ile birebir aynı",
+    "spaghetti_carbonara/1551970": "test spaghetti_carbonara/1552336 ile birebir aynı",
+    "spaghetti_carbonara/3302076": "test spaghetti_carbonara/3298793 ile neredeyse aynı (0,996)",
+    "spaghetti_carbonara/501296": "test spaghetti_carbonara/501277 ile birebir aynı (val'de)",
+    "waffles/961486": "test waffles/899285 ile birebir aynı",
+    # Aynı dosya iki farklı sınıfta → çelişkili etiket
+    "omelette/2619753": "pancakes/2619752 ile aynı dosya",
+    "pancakes/2619752": "omelette/2619753 ile aynı dosya",
+}
+
+
 class Food101Subset(Dataset):
     """FOOD101_CLASSES'taki sınıflar; etiket = listedeki sıra. (görüntü, etiket) döner.
 
-    Beklenen yapı (torchvision Food101 indirmesi veya Kaggle kopyası):
+    split: "train" | "val" | "test". val, resmi train'den her sınıfın %10'u (75 görüntü), sabit tohumla;
+    train geri kalan 675. test = resmi test (sınıf başına 250, elle temizlenmiş).
+    Not: Food-101'in resmi train'i bilerek temizlenmemiştir, etiket gürültüsü içerir (bkz. EDA).
+    exclude=True: FOOD101_EXCLUDE'daki görüntüler train/val'den atılır (ayrım bundan ÖNCE yapılır,
+    böylece diğer görüntülerin hangi kümede olduğu değişmez).
+
+    Beklenen yapı (scripts/get_food101.py fetch veya torchvision Food101 indirmesi):
         <root>/food-101/meta/{train,test}.json   ve   <root>/food-101/images/<sınıf>/<id>.jpg
     """
 
-    def __init__(self, split, transform, root=FOOD101_DIR, classes=FOOD101_CLASSES):
+    def __init__(self, split, transform, root=FOOD101_DIR, classes=FOOD101_CLASSES, exclude=True):
         base = Path(root) / "food-101"
-        with open(base / "meta" / f"{split}.json") as f:
+        with open(base / "meta" / f"{'test' if split == 'test' else 'train'}.json") as f:
             meta = json.load(f)
         self.classes, self.transform = list(classes), transform
-        self.samples = [(base / "images" / f"{name}.jpg", label)
-                        for label, cls in enumerate(self.classes) for name in meta[cls]]
+        self.samples = []
+        for label, cls in enumerate(self.classes):
+            names = sorted(meta[cls])
+            if split != "test":
+                val = set(random.Random(f"{SEED}-{cls}").sample(names, len(names) // 10))
+                names = [n for n in names if (n in val) == (split == "val") and not (exclude and n in FOOD101_EXCLUDE)]
+            self.samples += [(base / "images" / f"{n}.jpg", label) for n in names]
 
     def __len__(self):
         return len(self.samples)

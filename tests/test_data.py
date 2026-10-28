@@ -35,16 +35,19 @@ def test_val_split_never_breaks_a_group():
 
 def test_food101_subset(tmp_path):
     base = tmp_path / "food-101"
-    meta = {c: [f"{c}/{i}" for i in range(2)] for c in FOOD101_CLASSES + ["beignets"]}
     (base / "meta").mkdir(parents=True)
-    (base / "meta" / "train.json").write_text(json.dumps(meta))
+    for split, n in [("train", 20), ("test", 4)]:
+        meta = {c: [f"{c}/{split}{i}" for i in range(n)] for c in FOOD101_CLASSES + ["beignets"]}
+        (base / "meta" / f"{split}.json").write_text(json.dumps(meta))
     for c in FOOD101_CLASSES:
         (base / "images" / c).mkdir(parents=True)
-        for i in range(2):
-            Image.new("RGB", (8, 8)).save(base / "images" / c / f"{i}.jpg")
-    ds = Food101Subset("train", transform=lambda x: x, root=tmp_path)
-    assert len(ds) == 2 * len(FOOD101_CLASSES)          # listede olmayan sınıf alınmadı
-    assert ds[0][1] == 0 and ds[len(ds) - 1][1] == len(FOOD101_CLASSES) - 1
+        Image.new("RGB", (8, 8)).save(base / "images" / c / "train0.jpg")
+    k = len(FOOD101_CLASSES)
+    train, val, test = (Food101Subset(s, transform=lambda x: x, root=tmp_path) for s in ("train", "val", "test"))
+    assert (len(train), len(val), len(test)) == (18 * k, 2 * k, 4 * k)   # listede olmayan sınıf alınmadı
+    assert not {p for p, _ in train.samples} & {p for p, _ in val.samples}
+    assert val.samples == Food101Subset("val", transform=None, root=tmp_path).samples  # tohum sabit
+    assert train.samples[0][1] == 0 and train.samples[-1][1] == k - 1
     assert len(FOOD101_CLASSES) == len(set(FOOD101_CLASSES)) == 25
 
 
