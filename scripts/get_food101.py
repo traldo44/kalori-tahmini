@@ -75,7 +75,10 @@ def fetch(out_root):
         return
     archive = download(repo_slug(), ARCHIVE, out_root, tag="data")
     with tarfile.open(archive) as tar:
-        tar.extractall(out_root, filter="data")
+        try:
+            tar.extractall(out_root, filter="data")
+        except TypeError:  # Python < 3.11.4: filter parametresi yok
+            tar.extractall(out_root)
     archive.unlink()
     print(f"Hazır: {out_root / 'food-101'}")
 
