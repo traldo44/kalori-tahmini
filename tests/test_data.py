@@ -65,3 +65,23 @@ def test_real_splits_have_no_overlap_and_no_bad_dishes():
     assert not set(train) & set(test)
     assert not set(train) & set(BAD_DISHES)
     assert all(dish_time(d) > 0 for d in train[:10])
+
+
+@needs_n5k
+def test_real_ingredients():
+    from src.data import read_dish_ingredients
+    ingr = read_dish_ingredients()
+    names = [n for n, _, _ in ingr["dish_1561662216"]]
+    assert names[:3] == ["soy sauce", "garlic", "white rice"]
+    assert ingr["dish_1560974769"][4][:2] == ("white rice", 2991.0)  # EDA'da bulunan yazım hatası
+
+
+@needs_n5k
+def test_calorie_bin_edges_still_match_train():
+    """BAD_DISHES veya veri değişirse Tablo 3 sınırları sessizce kaymasın."""
+    import numpy as np
+    from src.config import CALORIE_BIN_EDGES
+    from src.metrics import calorie_bins
+    meta = read_dish_metadata()
+    train = load_n5k_split("train", metadata=meta, verbose=False)
+    assert np.allclose(calorie_bins([meta[d]["calories"] for d in train]), CALORIE_BIN_EDGES, atol=0.1)

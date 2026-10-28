@@ -11,3 +11,6 @@ tqdm==4.70.1
 pillow==12.3.0
 gradio==6.31.0
 pytest==9.2.0
+scipy==1.18.1
+nbconvert==7.17.2
+ipykernel==7.4.0

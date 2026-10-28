@@ -24,6 +24,11 @@ IMAGENET_STD = (0.229, 0.224, 0.225)
 VAL_FRACTION = 0.1
 VAL_GROUP_GAP_SEC = 600
 
+# Tablo 3 aralık sınırları (kcal): resmi train'in (hatalılar hariç) üçte birlik dilimleri.
+# EDA'da bir kez hesaplandı (notebooks/01_eda_nutrition5k.ipynb) ve SABİTLENDİ.
+# düşük < 116.1 ≤ orta < 313.7 ≤ yüksek
+CALORIE_BIN_EDGES = (116.1, 313.7)
+
 
 def set_seed(seed=SEED):
     import torch

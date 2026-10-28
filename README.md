@@ -54,6 +54,15 @@ Fotoğraf → Ön işleme (224 px, normalizasyon, augmentation)
 3. **Hazır VLM'ler zayıf.** Nutrition5k'da en iyi sıfır-atış VLM 80,7 kcal MAE yapıyor; ince ayarlı özel modeller 27–40 kcal aralığında.
 4. **Ön eğitim verisi belirleyici.** Açık veriyle (ImageNet) ön eğitilmiş ViT 88 kcal, ResNet-50 117 kcal hata yapmış. Orijinal makalenin 70,6 kcal sonucu, kamuya açık olmayan JFT-300M ön eğitimiyle alınmış.
 
+### EDA'dan çıkan bulgular (Adım 6, `notebooks/01_eda_nutrition5k.ipynb`)
+
+1. **3 hatalı tabak** eğitimden çıkarıldı (`BAD_DISHES`). Test kümesine dokunulmadı.
+2. **Hedef dönüşümü:** Baseline **ham kcal + L1 kaybı** (`target="raw"`). Ham dağılımın çarpıklığının çoğu tek bir hatalı tabaktan geliyordu (2,68 → 1,18). `log1p` dağılımı ters yöne bozuyor (−0,80; 10 kcal altı tabaklar uzun bir sol kuyruk yapıyor) ve MAE yerine göreli hatayı optimize ediyor. `log1p` + Huber yalnızca ablation'da denenecek.
+3. **Balık etiketleri tutarsız:** Malzeme tablosunda "fish" 0,90 kcal/g, ama makrolarına göre ~1,9 olmalı. Balıklı 183 tabağın 149'unda kalori, makrolardan hesaplanandan (Atwater) 50 kcal'den fazla düşük. Çıkarılmıyor; hata analizinde balıklı/balıksız MAE **ayrı** raporlanacak.
+4. **Resmi test kümesinde de sızıntı var:** Test tabaklarının %22'sinin train'de malzeme eklenmiş/çıkarılmış bir "kardeşi" var. Literatür aynı ayrımı kullandığı için karşılaştırma adil, ama **bizim val MAE'miz büyük ihtimalle test MAE'sinden kötü çıkacak**. Bu bir hata değil; raporda sınırlılık olarak yazılacak.
+5. Kalori en çok **yağ (0,88)** ve **protein (0,85)** ile ilişkili, kütleyle 0,74. Bu, çok görevli başlığın (Adım 12) gerekçesi.
+6. **Tablo 3 sınırları:** düşük < 116,1 ≤ orta < 313,7 ≤ yüksek kcal. `CALORIE_BIN_EDGES` olarak sabitlendi; bir test bunların değişmediğini kontrol ediyor.
+
 ### Hedeflerimiz (Nutrition5k test, yalnızca RGB)
 
 | Referans | Kalori MAE (kcal) | PMAE (%) | Bizim için anlamı |
@@ -74,7 +83,7 @@ Fotoğraf → Ön işleme (224 px, normalizasyon, augmentation)
 | 1 | Veri seti seçimi ve gerekçesi | ✅ Tamamlandı |
 | — | Platform seçimi | ✅ Kaggle (eğitim) + Mac. Kaggle kurulumu ✅ (repo okuma/yazma doğrulandı) |
 | 2 | Kurulum, veri indirme | ✅ Mac'te: repo, `metrics.py`, veri okuyucular, testler; Nutrition5k indirildi |
-| 2 | Temizlik, EDA | ⬜ Gün 1–2 (1 hatalı tabak şimdiden bulundu, `src/data.py` → `BAD_DISHES`) |
+| 2 | Temizlik, EDA | Nutrition5k ✅ (`notebooks/01_eda_nutrition5k.ipynb`, §2'deki EDA bulguları) · Food-101 ⬜ |
 | 3 | Baseline modeller | ⬜ Gün 2–3 |
 | 3 | CNN / Transformer eğitimi | ⬜ Gün 3–5 |
 | 4 | Değerlendirme + VLM referansı | ⬜ Gün 5–6 |
@@ -82,7 +91,7 @@ Fotoğraf → Ön işleme (224 px, normalizasyon, augmentation)
 | — | Tablolar, figürler, kodun temizlenmesi | ⬜ Gün 8–9 |
 | 6–7 | Rapor ve sunum | ⬜ Geliştirmeden sonra |
 
-**Kısaca:** Repo kuruldu; ortak kod (metrikler, veri okuyucular, dönüşümler, demo iskeleti) yazıldı ve testleri geçiyor. Nutrition5k Mac'e indirildi. Kaggle kurulumu tamam. Sıradaki adımlar: **Adım 5** (Food-101'i indir) ve **Adım 6** (Nutrition5k EDA).
+**Kısaca:** Repo kuruldu; ortak kod (metrikler, veri okuyucular, dönüşümler, demo iskeleti) yazıldı ve testleri geçiyor. Nutrition5k Mac'e indirildi. Kaggle kurulumu tamam. Nutrition5k EDA'sı bitti (Adım 6). Sıradaki adımlar: **Adım 5** (Food-101'i indir) → **Adım 7** (Food-101 EDA) → **Adım 8** (naif baseline'lar).
 
 ### Açık konular (karar bekliyor)
 
@@ -123,9 +132,9 @@ Adımlar sırayla yapılır; her adımın bir çıktısı ve bir "bitti" kriteri
 | 19 | 9 | Demo: fotoğraf yükle → kcal (`app.py` iskeleti hazır) + kendi fotoğraflarımızla test (§7 Faz 4) | Çalışan demo, kısa bir video kaydı, `own_photos` satırları |
 | 20 | 9 | Toparlama: figürlerin son hali, kod temizliği, README | `main` dalında baştan sona çalışan kod. **Kontrol noktası 3** |
 
-**Durum (28 Ekim):** Adım 1, 2, 3, 4 ✅ · Adım 5: sınıf listesi ✅ (`src/data.py`), indirme ⏳
+**Durum (28 Ekim):** Adım 1, 2, 3, 4, 6 ✅ · Adım 5: sınıf listesi ✅ (`src/data.py`), indirme ⏳
 
-**Sıradaki adım:** Adım 5 ve 6.
+**Sıradaki adım:** Adım 5 ve 7, ardından 8.
 
 ---
 
@@ -166,7 +175,8 @@ kalori-tahmini/
 │   ├── nutrition5k/
 │   └── food101/
 ├── notebooks/
-│   ├── 01_eda_nutrition5k.ipynb
+│   ├── 00_kaggle_kurulum.ipynb   ← Kaggle'ın ilk hücreleri (§5.1)  ✅
+│   ├── 01_eda_nutrition5k.ipynb  ✅
 │   ├── 02_eda_food101.ipynb
 │   └── ...
 ├── src/
@@ -175,6 +185,7 @@ kalori-tahmini/
 │   ├── transforms.py      ← kalori / sınıflandırma dönüşümleri (§6.1)          ✅
 │   ├── metrics.py         ← ORTAK: tüm metrikler + güven aralıkları             ✅
 │   ├── results.py         ← results.csv'ye satır ekleme, tahmin kaydetme        ✅
+│   ├── plot_style.py      ← ORTAK grafik stili: tüm figürler `apply()` ile      ✅
 │   ├── compare.py         ← iki modeli eşleştirilmiş bootstrap ile karşılaştır  ✅
 │   ├── models.py          ← omurga + başlıklar, checkpoint biçimi, tek foto tahmini ✅ (temel)
 │   ├── eval_own_photos.py ← kendi fotoğraflarımızla dış test (§7, Faz 4)       ✅
@@ -190,6 +201,7 @@ kalori-tahmini/
 ├── results/
 │   ├── results.csv        ← ORTAK: her deneyin sonucu buraya
 │   ├── preds/             ← her modelin test tahminleri (git'te)
+│   ├── data_card_nutrition5k.csv ← veri kartı (EDA)
 │   └── figures/
 └── checkpoints/           ← git'e EKLENMEZ
 ```
@@ -208,14 +220,14 @@ Yapı: `data/nutrition5k/realsense_overhead/dish_XXXXXXXXXX/rgb.png` (640×480),
 
 | Bölme | Listedeki kimlik | Üstten görüntüsü olan | Hatalı (atıldı) | Kullanılan |
 | --- | --- | --- | --- | --- |
-| train (`rgb_train_ids.txt`) | 4059 | 2755 | 1 | **2754** → 2476 train + 278 val |
+| train (`rgb_train_ids.txt`) | 4059 | 2755 | 3 | **2752** → 2472 train + 280 val |
 | test (`rgb_test_ids.txt`) | 709 | 507 | 0 | **507** |
 
 Üstten görüntüsü olan tabaklar tam olarak `depth_{train,test}_ids.txt` listeleri. Literatürdeki "üstten RGB" sonuçları da bu 507 tabaklık test kümesiyle karşılaştırılmalı. Bölmeler yalnızca Cafe 1'i kapsıyor (Cafe 2 kullanılmıyor, bkz. `dish_ids/README`).
 
 **Metadata:** Her satır bir tabak: `dish_id, total_calories, total_mass, total_fat, total_carb, total_protein`, ardından malzeme başına 7'li gruplar. Satır uzunlukları farklı olduğu için `pandas.read_csv` hata verir; `src/data.py` → `read_dish_metadata` bunu `csv` modülüyle okur.
 
-**Görüntülerden öğrendiklerimiz:** Tabaklar her zaman ortada değil, bazıları kenara taşıyor (o yüzden kırpma yok, §6.1). Bazı görüntüler hatalı: ör. `dish_1559172356`'da yemek değil telefon var ama etiketi 313 kcal. EDA'da bulunanlar `BAD_DISHES`'a eklenir.
+**Görüntülerden öğrendiklerimiz:** Tabaklar her zaman ortada değil, bazıları kenara taşıyor (o yüzden kırpma yok, §6.1). EDA'da 3 hatalı tabak bulundu ve `BAD_DISHES`'a eklendi: telefon görüntüsü (313 kcal), "2991 g pirinç" yazım hatası (3943 kcal), domatesli ama "boş tabak" etiketli tabak (bkz. `results/figures/n5k_hatali_tabaklar.png`).
 
 ### 5.4 Food-101 (alt küme)
 
@@ -246,7 +258,7 @@ Alt küme **25 sınıf** olarak sabitlendi: `src/data.py` → `FOOD101_CLASSES`.
 | Rastgelelik tohumu | `42` (torch, numpy, random) |
 | Görüntü boyutu | 224 × 224 (iyileştirme fazında 384 denenebilir). Nutrition5k: 640×480'in **tamamı** 224×224'e küçültülür, kırpılmaz |
 | Normalizasyon | ImageNet ortalama/std |
-| Doğrulama kümesi | Train'in ~%10'u, **zaman gruplarıyla** ayrılır: `make_val_split()`. Aralarında 10 dakikadan az olan tabaklar aynı gruptadır ve aynı kümeye düşer. Sonuç: 2476 train / 278 val. Gerekçe: tabaklar malzeme malzeme eklenerek art arda çekilmiş; ardışık tabak çiftlerinin %57'sinde malzeme listeleri iç içe. Rastgele ayırma neredeyse aynı tabağı hem train'e hem val'e koyar |
+| Doğrulama kümesi | Train'in ~%10'u, **zaman gruplarıyla** ayrılır: `make_val_split()`. Aralarında 10 dakikadan az olan tabaklar aynı gruptadır ve aynı kümeye düşer. Sonuç: 2472 train / 280 val. Gerekçe: tabaklar malzeme malzeme eklenerek art arda çekilmiş; ardışık tabak çiftlerinin %57'sinde malzeme listeleri iç içe. Rastgele ayırma neredeyse aynı tabağı hem train'e hem val'e koyar |
 | Veri artırma, **kalori** | Yalnızca yatay/dikey çevirme, 90° döndürme, renk/parlaklık: `calorie_transform()`. **RandomResizedCrop, zoom, ölçekli kırpma YASAK**: model porsiyonu tabağın kapladığı alandan öğrenir; ölçeği değiştirmek etiketle çelişir. `tests/test_transforms.py` bunu kontrol eder |
 | Veri artırma, **sınıflandırma** | RandomResizedCrop + çevirme + RandAugment serbest: `classification_transform()` |
 | Test kümesi | Nutrition5k resmi test bölmesi. Hiperparametre seçimi **asla** test üzerinde yapılmaz |
@@ -439,6 +451,7 @@ Bu dosyanın kapsamı dışında; bilgi için:
 
 | Tarih | Kim | Son tamamlanan adım | Yarım kalan iş / sıradaki adım | Notlar (değişen ayarlar, sorunlar) |
 | --- | --- | --- | --- | --- |
+| 2026-10-28 | traldo | Adım 6: Nutrition5k EDA | Adım 5: Food-101 indir → Adım 7: Food-101 EDA → Adım 8 | `BAD_DISHES` 3 tabak; kullanılabilir 2472 train / 280 val / 507 test. Baseline hedefi **ham kcal + L1** (log1p ablation'da). `CALORIE_BIN_EDGES` sabitlendi. Ortak grafik stili: `src/plot_style.py`. Bulgular §2'de |
 | 2026-10-28 | traldo | Adım 2, 3, 4 (+ Adım 1 Mac tarafı, Adım 5 sınıf listesi) | Adım 5: Food-101 indir → Adım 6: Nutrition5k EDA | **Yeni:** zaman gruplu val ayrımı, kalori için ölçeksiz artırma, bootstrap güven aralıkları, `src.compare`, kendi fotoğraf testi, demo iskeleti, checkpoint paylaşımı. Food-101 25 sınıf. `BAD_DISHES`'ta 1 tabak. Kullanılabilir veri: 2476 train / 278 val / 507 test. Kaggle kurulumu tamam (classic token; `notebooks/00_kaggle_kurulum.ipynb`). "Açık konular" tablosuna bakın (§3) |
 | 2026-10-24 | — | Planlama ve literatür bitti | Adım 1: platform seçimi | Kod tarafında henüz bir şey yok |
 

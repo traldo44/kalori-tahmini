@@ -15,7 +15,7 @@ def build_regressor(backbone="resnet50", n_outputs=1, pretrained=True):
 
 
 def encode_target(y, target):
-    """Eğitimde hedefe uygulanan dönüşüm. 'log1p' sağa çarpık kalori dağılımı için (EDA kararı)."""
+    """Eğitimde hedefe uygulanan dönüşüm: 'raw' (baseline, EDA kararı) veya 'log1p' (ablation)."""
     return torch.log1p(y) if target == "log1p" else y
 
 
@@ -23,7 +23,7 @@ def decode_target(y, target):
     return torch.expm1(y) if target == "log1p" else y
 
 
-def save_checkpoint(path, model, backbone, outputs=("calories",), target="log1p", **info):
+def save_checkpoint(path, model, backbone, outputs=("calories",), target="raw", **info):
     """info: ör. test_MAE=92.3 → demo bunu kullanıcıya 'tipik hata' olarak gösterir."""
     torch.save({"backbone": backbone, "outputs": list(outputs), "target": target,
                 "state_dict": model.state_dict(), "info": info}, path)
