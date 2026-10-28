@@ -138,7 +138,7 @@ Adımlar sırayla yapılır; her adımın bir çıktısı ve bir "bitti" kriteri
 **Mac'te kurulum** (Python 3.12; [uv](https://docs.astral.sh/uv/) ile):
 
 ```bash
-git clone <repo-adresi> && cd kalori-tahmini
+git clone https://github.com/traldo44/kalori-tahmini.git && cd kalori-tahmini
 uv venv --python 3.12 .venv && uv pip install --python .venv/bin/python -r requirements.txt
 .venv/bin/python scripts/download_nutrition5k.py      # ~1,4 GB, birkaç dakika
 .venv/bin/python -m pytest -q                         # hepsi geçmeli
@@ -157,7 +157,7 @@ Her notebook'un ilk hücresi:
 import os
 from kaggle_secrets import UserSecretsClient
 os.environ["GH_TOKEN"] = token = UserSecretsClient().get_secret("GH_TOKEN")
-!git clone -q https://{token}@github.com/<kullanici>/kalori-tahmini.git
+!git clone -q https://{token}@github.com/traldo44/kalori-tahmini.git
 %cd kalori-tahmini
 !git config user.name "Ad Soyad" && git config user.email "eposta@ornek.com"
 !python scripts/download_nutrition5k.py --out /kaggle/working/data/nutrition5k
@@ -305,7 +305,7 @@ Sütunlar: `date, owner, task, model, config, split, accuracy, precision, recall
 
 ### 6.4 Git
 
-- Repo GitHub'da (private); iki kişi de collaborator. Kaggle notebook'ları repo'yu token ile klonlar (§5.1).
+- Repo: [traldo44/kalori-tahmini](https://github.com/traldo44/kalori-tahmini) (private); iki kişi de collaborator. Kaggle notebook'ları repo'yu token ile klonlar (§5.1).
 - `main` dalı her zaman çalışır durumda olmalı. Her adım kendi dalında yapılır (ör. `adim-09-klasik-ml`) ve bittiğinde `main`'e birleştirilir.
 - Çalışmayı bırakmadan önce yarım işi de commit'leyip push edin; commit mesajında hangi adımda kaldığınızı yazın. İşe başlarken önce `git pull`.
 - Birleştirmeden önce `python -m pytest -q` geçmeli.
