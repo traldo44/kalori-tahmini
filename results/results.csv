@@ -9,3 +9,27 @@ date,owner,task,model,config,split,accuracy,precision,recall,f1,f1_ci_low,f1_ci_
 2026-10-28,traldo,calorie_bins,naive_median,sabit=208.1kcal,test,0.3136,0.1045,0.3333,0.1592,0.1418,0.174,,,,,,,,,,Adım 8 naif baseline
 2026-10-28,traldo,cls,naive_most_frequent,sınıf=apple_pie,val,0.04,0.0016,0.04,0.0031,0.0025,0.0037,,,,,,,,,,Adım 8 naif baseline (sınıflar dengeli: 1/25)
 2026-10-28,traldo,cls,naive_most_frequent,sınıf=apple_pie,test,0.04,0.0016,0.04,0.0031,0.0027,0.0034,,,,,,,,,,Adım 8 naif baseline (sınıflar dengeli: 1/25)
+2026-10-28,traldo,calorie,cnn_ridge,alpha=10000,val,,,,,,,,84.8801,75.5697,94.3238,34.1971,90.6693,119.3019,0.6019,68.9286,"Adım 9 klasik ML; val MAE: alpha=10→168.1, alpha=100→119.5, alpha=1000→90.2, alpha=10000→84.9, alpha=100000→109.8"
+2026-10-28,traldo,calorie_bins,cnn_ridge,alpha=10000,val,0.6643,0.7135,0.6607,0.6644,0.6094,0.7184,,,,,,,,,,Adım 9 klasik ML
+2026-10-28,traldo,calorie,cnn_ridge,alpha=10000,test,,,,,,,,78.2152,72.0467,85.5988,30.6165,90.3829,113.2762,0.7146,74.359,"Adım 9 klasik ML; val MAE: alpha=10→168.1, alpha=100→119.5, alpha=1000→90.2, alpha=10000→84.9, alpha=100000→109.8"
+2026-10-28,traldo,calorie_bins,cnn_ridge,alpha=10000,test,0.7396,0.7702,0.7402,0.743,0.7046,0.7795,,,,,,,,,,Adım 9 klasik ML
+2026-10-28,traldo,calorie,cnn_rf,min_leaf=1,val,,,,,,,,86.3003,77.486,96.5403,34.7693,92.1871,120.4019,0.5946,66.4286,"Adım 9 klasik ML; val MAE: min_leaf=1→86.3, min_leaf=5→86.4"
+2026-10-28,traldo,calorie_bins,cnn_rf,min_leaf=1,val,0.6536,0.7331,0.6485,0.6519,0.592,0.7048,,,,,,,,,,Adım 9 klasik ML
+2026-10-28,traldo,calorie,cnn_rf,min_leaf=1,test,,,,,,,,88.9384,81.9374,96.8953,34.814,127.5703,126.7941,0.6424,69.0335,"Adım 9 klasik ML; val MAE: min_leaf=1→86.3, min_leaf=5→86.4"
+2026-10-28,traldo,calorie_bins,cnn_rf,min_leaf=1,test,0.7041,0.7586,0.7064,0.7099,0.6701,0.7463,,,,,,,,,,Adım 9 klasik ML
+2026-10-28,traldo,calorie,cnn_xgb,"max_depth=6,n_trees=915",val,,,,,,,,76.051,67.3425,85.7463,30.64,70.4399,112.7586,0.6444,72.8571,"Adım 9 klasik ML; val MAE: max_depth=4→76.4, max_depth=6→76.1"
+2026-10-28,traldo,calorie_bins,cnn_xgb,"max_depth=6,n_trees=915",val,0.6714,0.7292,0.6677,0.6772,0.6248,0.7272,,,,,,,,,,Adım 9 klasik ML
+2026-10-28,traldo,calorie,cnn_xgb,"max_depth=6,n_trees=915",test,,,,,,,,77.3745,70.8686,84.8102,30.2875,78.8608,114.1721,0.7101,73.1755,"Adım 9 klasik ML; val MAE: max_depth=4→76.4, max_depth=6→76.1"
+2026-10-28,traldo,calorie_bins,cnn_xgb,"max_depth=6,n_trees=915",test,0.7416,0.771,0.7424,0.7467,0.7075,0.7851,,,,,,,,,,Adım 9 klasik ML
+2026-10-28,traldo,calorie,hogcolor_xgb,"max_depth=4,n_trees=342",val,,,,,,,,95.1837,84.0886,106.6808,38.3483,107.2823,134.9653,0.4905,63.9286,"Adım 9 klasik ML; val MAE: max_depth=4→95.2, max_depth=6→95.3"
+2026-10-28,traldo,calorie_bins,hogcolor_xgb,"max_depth=4,n_trees=342",val,0.6286,0.6925,0.6233,0.6271,0.5695,0.6808,,,,,,,,,,Adım 9 klasik ML
+2026-10-28,traldo,calorie,hogcolor_xgb,"max_depth=4,n_trees=342",test,,,,,,,,103.9478,96.2513,112.1278,40.6893,141.0265,139.9466,0.5644,61.7357,"Adım 9 klasik ML; val MAE: max_depth=4→95.2, max_depth=6→95.3"
+2026-10-28,traldo,calorie_bins,hogcolor_xgb,"max_depth=4,n_trees=342",test,0.6272,0.6788,0.629,0.6354,0.5979,0.677,,,,,,,,,,Adım 9 klasik ML
+2026-10-28,traldo,cls,hogcolor_svm_rbf,C=10,val,0.2599,0.2559,0.2598,0.2556,0.2364,0.2734,0.6158,,,,,,,,,"Adım 9 klasik ML; val F1: C=1→0.251, C=10→0.256"
+2026-10-28,traldo,cls,hogcolor_svm_rbf,C=10,test,0.2984,0.2921,0.2984,0.2933,0.2827,0.3043,0.6528,,,,,,,,,"Adım 9 klasik ML; val F1: C=1→0.251, C=10→0.256"
+2026-10-28,traldo,cls,hogcolor_rf,min_leaf=3,val,0.2465,0.2313,0.2466,0.2263,0.2065,0.2439,0.5795,,,,,,,,,"Adım 9 klasik ML; val F1: min_leaf=1→0.220, min_leaf=3→0.226"
+2026-10-28,traldo,cls,hogcolor_rf,min_leaf=3,test,0.2702,0.2641,0.2702,0.2495,0.2393,0.2602,0.6109,,,,,,,,,"Adım 9 klasik ML; val F1: min_leaf=1→0.220, min_leaf=3→0.226"
+2026-10-28,traldo,cls,hogcolor_knn,k=5,val,0.0966,0.1371,0.0966,0.0792,0.0654,0.0917,0.2908,,,,,,,,,"Adım 9 klasik ML; val F1: k=5→0.079, k=15→0.066, k=31→0.065"
+2026-10-28,traldo,cls,hogcolor_knn,k=5,test,0.0994,0.1589,0.0994,0.0798,0.0726,0.0869,0.3229,,,,,,,,,"Adım 9 klasik ML; val F1: k=5→0.079, k=15→0.066, k=31→0.065"
+2026-10-28,traldo,cls,cnn_logreg,C=0.01,val,0.7812,0.7866,0.7813,0.7823,0.7628,0.7985,0.9573,,,,,,,,,"Adım 9 klasik ML; val F1: C=0.01→0.782, C=0.1→0.763, C=1→0.763"
+2026-10-28,traldo,cls,cnn_logreg,C=0.01,test,0.8371,0.8379,0.8371,0.8372,0.8282,0.8463,0.9794,,,,,,,,,"Adım 9 klasik ML; val F1: C=0.01→0.782, C=0.1→0.763, C=1→0.763"
