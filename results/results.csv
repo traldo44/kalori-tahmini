@@ -33,3 +33,15 @@ date,owner,task,model,config,split,accuracy,precision,recall,f1,f1_ci_low,f1_ci_
 2026-10-28,traldo,cls,hogcolor_knn,k=5,test,0.0994,0.1589,0.0994,0.0798,0.0726,0.0869,0.3229,,,,,,,,,"Adım 9 klasik ML; val F1: k=5→0.079, k=15→0.066, k=31→0.065"
 2026-10-28,traldo,cls,cnn_logreg,C=0.01,val,0.7812,0.7866,0.7813,0.7823,0.7628,0.7985,0.9573,,,,,,,,,"Adım 9 klasik ML; val F1: C=0.01→0.782, C=0.1→0.763, C=1→0.763"
 2026-10-28,traldo,cls,cnn_logreg,C=0.01,test,0.8371,0.8379,0.8371,0.8372,0.8282,0.8463,0.9794,,,,,,,,,"Adım 9 klasik ML; val F1: C=0.01→0.782, C=0.1→0.763, C=1→0.763"
+2026-10-28,mert,cls,resnet50_cls,resnet50.a1_in1k_lr0.0001/0.001_bs32_224px_ep20/20_ls0.1,val,0.8837,0.885,0.8837,0.8836,0.8688,0.8969,0.9749,,,,,,,,,Adım 10/13 transfer CNN; 23.6M parametre; 1.31 ms/görüntü (cuda)
+2026-10-28,mert,cls,resnet50_cls,resnet50.a1_in1k_lr0.0001/0.001_bs32_224px_ep20/20_ls0.1,test,0.9125,0.9127,0.9125,0.9121,0.9048,0.9187,0.9901,,,,,,,,,Adım 10/13 transfer CNN; 23.6M parametre; 1.31 ms/görüntü (cuda)
+2026-10-28,mert,cls,efficientnet_b0_cls,efficientnet_b0.ra_in1k_lr0.0001/0.001_bs32_224px_ep16/20_ls0.1,val,0.8869,0.8883,0.8869,0.8869,0.872,0.9001,0.9733,,,,,,,,,Adım 10/13 transfer CNN; 4.0M parametre; 0.70 ms/görüntü (cuda)
+2026-10-28,mert,cls,efficientnet_b0_cls,efficientnet_b0.ra_in1k_lr0.0001/0.001_bs32_224px_ep16/20_ls0.1,test,0.917,0.9177,0.917,0.9166,0.9093,0.9235,0.9898,,,,,,,,,Adım 10/13 transfer CNN; 4.0M parametre; 0.70 ms/görüntü (cuda)
+2026-10-28,mert,calorie,resnet50_reg,resnet50.a1_in1k_lr0.0001/0.001_bs32_224px_ep30/30_l1_raw,val,,,,,,,,62.6503,55.857,70.4496,25.241,48.1316,90.5175,0.7708,81.7857,Adım 11–13 transfer CNN
+2026-10-28,mert,calorie_bins,resnet50_reg,resnet50.a1_in1k_lr0.0001/0.001_bs32_224px_ep30/30_l1_raw,val,0.7393,0.7601,0.7376,0.7436,0.6916,0.7945,,,,,,,,,,Adım 11–13 transfer CNN
+2026-10-28,mert,calorie,resnet50_reg,resnet50.a1_in1k_lr0.0001/0.001_bs32_224px_ep30/30_l1_raw,test,,,,,,,,59.662,53.589,66.2556,23.3541,51.8141,91.7345,0.8128,80.6706,Adım 11–13 transfer CNN
+2026-10-28,mert,calorie_bins,resnet50_reg,resnet50.a1_in1k_lr0.0001/0.001_bs32_224px_ep30/30_l1_raw,test,0.8047,0.8135,0.804,0.8057,0.7678,0.8392,,,,,,,,,,Adım 11–13 transfer CNN
+2026-10-28,mert,calorie,efficientnet_b0_reg,efficientnet_b0.ra_in1k_lr0.0001/0.001_bs32_224px_ep28/30_l1_raw,val,,,,,,,,109.1918,98.1787,121.1634,43.992,98.4801,147.119,0.3947,56.0714,Adım 11–13 transfer CNN
+2026-10-28,mert,calorie_bins,efficientnet_b0_reg,efficientnet_b0.ra_in1k_lr0.0001/0.001_bs32_224px_ep28/30_l1_raw,val,0.5607,0.5719,0.5596,0.5609,0.5025,0.6173,,,,,,,,,,Adım 11–13 transfer CNN
+2026-10-28,mert,calorie,efficientnet_b0_reg,efficientnet_b0.ra_in1k_lr0.0001/0.001_bs32_224px_ep28/30_l1_raw,test,,,,,,,,104.4046,96.9624,112.3951,40.8681,140.9316,137.7137,0.5782,57.5937,Adım 11–13 transfer CNN
+2026-10-28,mert,calorie_bins,efficientnet_b0_reg,efficientnet_b0.ra_in1k_lr0.0001/0.001_bs32_224px_ep28/30_l1_raw,test,0.5976,0.6109,0.5949,0.5999,0.5579,0.6395,,,,,,,,,,Adım 11–13 transfer CNN
