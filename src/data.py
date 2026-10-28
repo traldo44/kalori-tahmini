@@ -18,6 +18,8 @@ TARGETS = ("calories", "mass", "fat", "carb", "protein")
 # Yeni bulduğunuzu gerekçesiyle buraya ekleyin ve devir günlüğüne yazın.
 BAD_DISHES = {
     "dish_1559172356": "görüntüde yemek yok, telefon var (etiket 313 kcal)",
+    "dish_1560974769": "veri giriş hatası: '2991 g beyaz pirinç' (fotoğrafta küçük porsiyon) → 3943 kcal",
+    "dish_1556575700": "etiket 'plate only' (0 kcal) ama fotoğrafta ~6 kiraz domates var (86 g)",
 }
 
 
@@ -30,6 +32,17 @@ def read_dish_metadata(meta_dir=N5K_DIR / "metadata"):
                 if not row or not row[0].startswith("dish_"):
                     continue  # başlık veya boş satır
                 dishes[row[0]] = dict(zip(TARGETS, map(float, row[1:6])))
+    return dishes
+
+
+def read_dish_ingredients(meta_dir=N5K_DIR / "metadata"):
+    """{dish_id: [(malzeme, gram, kcal), ...]}. Hata analizi için (ör. balıklı tabaklar, bkz. EDA)."""
+    dishes = {}
+    for path in sorted(Path(meta_dir).glob("dish_metadata_cafe*.csv")):
+        with open(path, newline="") as f:
+            for row in csv.reader(f):
+                if row and row[0].startswith("dish_"):
+                    dishes[row[0]] = [(row[i + 1], float(row[i + 2]), float(row[i + 3])) for i in range(6, len(row), 7)]
     return dishes
 
 
