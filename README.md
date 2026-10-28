@@ -117,13 +117,13 @@ Hiperparametreler yalnızca val'de seçildi; test bir kez ölçüldü. Köşeli 
 | 2 | Kurulum, veri indirme | ✅ Mac'te: repo, `metrics.py`, veri okuyucular, testler; Nutrition5k indirildi |
 | 2 | Temizlik, EDA | ✅ Nutrition5k (`notebooks/01_eda_nutrition5k.ipynb`) · Food-101 (`notebooks/02_eda_food101.ipynb`); bulgular §2'de |
 | 3 | Baseline modeller | ✅ Naif (Adım 8, `src/baselines.py`) · Klasik ML (Adım 9, `src/classic_ml.py`) · **Kontrol noktası 1 ✅** |
-| 3 | CNN / Transformer eğitimi | ⬜ Gün 3–5 |
+| 3 | CNN / Transformer eğitimi | Eğitim betikleri ✅ (`src/train_cls.py`, `src/train_reg.py`, Mac'te denendi) · Kaggle çalıştırması ⏳ (`notebooks/10_egitim_kaggle.ipynb`) |
 | 4 | Değerlendirme + VLM referansı | ⬜ Gün 5–6 |
 | 5 | İyileştirme ve ablation | ⬜ Gün 6–8 |
 | — | Tablolar, figürler, kodun temizlenmesi | ⬜ Gün 8–9 |
 | 6–7 | Rapor ve sunum | ⬜ Geliştirmeden sonra |
 
-**Kısaca:** Repo kuruldu; ortak kod (metrikler, veri okuyucular, dönüşümler, demo iskeleti) yazıldı ve testleri geçiyor. Nutrition5k Mac'e indirildi. Kaggle kurulumu tamam. Adım 1–9 bitti: iki veri setinin EDA'sı, Food-101 alt kümesi (GitHub Release'te), naif baseline'lar ve klasik ML (`results.csv`, 34 satır). **Kontrol noktası 1 geçildi.** Sıradaki: **Adım 10–11**, Kaggle'da transfer öğrenmeli CNN'ler (ResNet-50, EfficientNet-B0). Çıta: donmuş ResNet-50 + XGBoost/Ridge'in **77–78 kcal**'i (§2, klasik ML bulguları).
+**Kısaca:** Repo kuruldu; ortak kod (metrikler, veri okuyucular, dönüşümler, demo iskeleti) yazıldı ve testleri geçiyor. Nutrition5k Mac'e indirildi. Kaggle kurulumu tamam. Adım 1–9 bitti: iki veri setinin EDA'sı, Food-101 alt kümesi (GitHub Release'te), naif baseline'lar ve klasik ML (`results.csv`, 34 satır). **Kontrol noktası 1 geçildi.** Eğitim betikleri hazır. Sıradaki: **`notebooks/10_egitim_kaggle.ipynb`'yi Kaggle'da çalıştırmak** (Adım 10–11: ResNet-50 ve EfficientNet-B0, sınıflandırma + kalori; ~1 saat, sonuçlar GitHub'a kendiliğinden gelir). Çıta: donmuş ResNet-50 + XGBoost/Ridge'in **77–78 kcal**'i ve LogReg'in **F1 0,837**'si (§2, klasik ML bulguları).
 
 ### Açık konular (karar bekliyor)
 
@@ -167,7 +167,7 @@ Adımlar sırayla yapılır; her adımın bir çıktısı ve bir "bitti" kriteri
 
 **Durum (28 Ekim):** Adım 1–9 ✅ · Kontrol noktası 1 ✅
 
-**Sıradaki adım:** Adım 10–11 (Kaggle, transfer CNN). Eğitim betikleri (`src/train_cls.py`, `src/train_reg.py`) yazılacak.
+**Sıradaki adım:** Adım 10–11'i Kaggle'da çalıştır: `notebooks/10_egitim_kaggle.ipynb` → Import → ilk hücrede ad/e-posta → Save & Run All (Commit).
 
 ---
 
@@ -213,6 +213,7 @@ kalori-tahmini/
 │   ├── 00_kaggle_kurulum.ipynb   ← Kaggle'ın ilk hücreleri (§5.1)  ✅
 │   ├── 01_eda_nutrition5k.ipynb  ✅
 │   ├── 02_eda_food101.ipynb      ✅
+│   ├── 10_egitim_kaggle.ipynb    ← Adım 10–11 eğitimleri, Kaggle (sonuçları kendisi push'lar)  ✅
 │   └── ...
 ├── src/
 │   ├── config.py          ← ORTAK sabitler (tohum, boyut, yollar, cihaz)       ✅
@@ -227,8 +228,9 @@ kalori-tahmini/
 │   ├── classic_ml.py      ← klasik ML (Adım 9)                                  ✅
 │   ├── models.py          ← omurga + başlıklar, checkpoint biçimi, tek foto tahmini ✅ (temel)
 │   ├── eval_own_photos.py ← kendi fotoğraflarımızla dış test (§7, Faz 4)       ✅
-│   ├── train_cls.py       ← sınıflandırma eğitimi                               ⬜
-│   ├── train_reg.py       ← kalori eğitimi                                      ⬜
+│   ├── trainer.py         ← ortak eğitim döngüsü (AdamW, ısınma+cosine, erken durdurma, AMP) ✅
+│   ├── train_cls.py       ← sınıflandırma eğitimi (Adım 10, 13)                 ✅
+│   ├── train_reg.py       ← kalori eğitimi; --targets ile çok görevli (Adım 11–13) ✅
 │   └── vlm_eval.py        ← VLM sıfır-atış referansı                            ⬜
 ├── scripts/
 │   ├── download_nutrition5k.py  ← gsutil'siz indirme (Mac ve Kaggle)           ✅
@@ -240,6 +242,7 @@ kalori-tahmini/
 ├── results/
 │   ├── results.csv        ← ORTAK: her deneyin sonucu buraya
 │   ├── preds/             ← her modelin test tahminleri (git'te)
+│   ├── history/           ← eğitim eğrileri: epoch başına kayıp ve val skoru (git'te)
 │   ├── data_card_nutrition5k.csv, data_card_food101.csv ← veri kartları (EDA)
 │   └── figures/
 └── checkpoints/           ← git'e EKLENMEZ
@@ -299,7 +302,7 @@ Alt küme **25 sınıf** olarak sabitlendi: `src/data.py` → `FOOD101_CLASSES`.
 | --- | --- |
 | Rastgelelik tohumu | `42` (torch, numpy, random) |
 | Görüntü boyutu | 224 × 224 (iyileştirme fazında 384 denenebilir). Nutrition5k: 640×480'in **tamamı** 224×224'e küçültülür, kırpılmaz |
-| Normalizasyon | ImageNet ortalama/std |
+| Normalizasyon | Omurganın ön eğitimdeki değerleri (`model_norm()`, timm `pretrained_cfg`): ResNet / EfficientNet / ConvNeXt → ImageNet ortalama/std, **ViT → 0,5/0,5**. Eğitim betikleri otomatik alır ve checkpoint'e yazar |
 | Doğrulama kümesi | Train'in ~%10'u, **zaman gruplarıyla** ayrılır: `make_val_split()`. Aralarında 10 dakikadan az olan tabaklar aynı gruptadır ve aynı kümeye düşer. Sonuç: 2472 train / 280 val. Gerekçe: tabaklar malzeme malzeme eklenerek art arda çekilmiş; ardışık tabak çiftlerinin %57'sinde malzeme listeleri iç içe. Rastgele ayırma neredeyse aynı tabağı hem train'e hem val'e koyar |
 | Veri artırma, **kalori** | Yalnızca yatay/dikey çevirme, 90° döndürme, renk/parlaklık: `calorie_transform()`. **RandomResizedCrop, zoom, ölçekli kırpma YASAK**: model porsiyonu tabağın kapladığı alandan öğrenir; ölçeği değiştirmek etiketle çelişir. `tests/test_transforms.py` bunu kontrol eder |
 | Veri artırma, **sınıflandırma** | RandomResizedCrop + çevirme + RandAugment serbest: `classification_transform()` |
@@ -493,6 +496,7 @@ Bu dosyanın kapsamı dışında; bilgi için:
 
 | Tarih | Kim | Son tamamlanan adım | Yarım kalan iş / sıradaki adım | Notlar (değişen ayarlar, sorunlar) |
 | --- | --- | --- | --- | --- |
+| 2026-10-28 | traldo | Adım 10–11 hazırlığı: eğitim betikleri | `notebooks/10_egitim_kaggle.ipynb`'yi Kaggle'da çalıştır | `src/trainer.py` + `train_cls.py` + `train_reg.py` (Mac'te küçük denemelerle test edildi). Kalori hedefleri train ortalamasına bölünerek ölçekleniyor; `--targets` ile çok görevli (Adım 12 hazır). ViT kendi normalizasyonunu kullanıyor. `--limit` yalnızca `--dry-run` ile |
 | 2026-10-28 | traldo | Adım 9: klasik ML · Kontrol noktası 1 ✅ | Adım 10–11: `train_cls.py` / `train_reg.py` yazılıp Kaggle'da ResNet-50 ve EfficientNet-B0 | `python -m src.classic_ml` → 8 model (val'de seçildi). Test: CNN + LogReg F1 0,837; CNN + XGBoost 77,4 kcal (Ridge 78,2; fark anlamlı değil). Özellik önbelleği `data/features/`. macOS'ta torch + xgboost aynı süreçte çöküyor → ayrı süreç (§5.1) |
 | 2026-10-28 | traldo | Adım 5, 7, 8: Food-101 alt kümesi + EDA, naif baseline'lar | Adım 9: klasik ML | Food-101 alt kümesi `data` Release'inde (662 MB; `get_food101.py fetch`, kesintide kaldığı yerden devam eder). `FOOD101_EXCLUDE` 11 görüntü (9 test sızıntısı + 1 çelişkili çift). Naif baseline'lar `results.csv`'de: test MAE 168,4 (ortalama) / 167,3 (medyan). Literatürdeki 150,8'lik baseline tekrarlanamadı (§3 Açık konular) |
 | 2026-10-28 | traldo | Adım 6: Nutrition5k EDA | Adım 5: Food-101 indir → Adım 7: Food-101 EDA → Adım 8 | `BAD_DISHES` 3 tabak; kullanılabilir 2472 train / 280 val / 507 test. Baseline hedefi **ham kcal + L1** (log1p ablation'da). `CALORIE_BIN_EDGES` sabitlendi. Ortak grafik stili: `src/plot_style.py`. Bulgular §2'de |
