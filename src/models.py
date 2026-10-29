@@ -19,6 +19,17 @@ def build_model(backbone="resnet50", n_outputs=1, pretrained=True):
 build_regressor = build_model  # eski ad
 
 
+@torch.no_grad()
+def init_regression_head(model):
+    """Başlık ağırlıkları 0, bias 1 → ilk tahmin her görüntü için train ortalaması (ölçeklenmiş hedef ~1).
+    Neden: timm'in EfficientNet başlatması (TF tarzı, fan_out=1 → ağırlıklar ±1) ilk çıktıyı ~7 kat büyük
+    veriyordu; ilk epoch'larda bozuk gradyanlar omurgayı da bozdu (Adım 11: test MAE 104 kcal)."""
+    head = model.get_classifier()
+    torch.nn.init.zeros_(head.weight)
+    torch.nn.init.ones_(head.bias)
+    return model
+
+
 def model_norm(model):
     """Omurganın ön eğitimde kullandığı normalizasyon (ör. ViT 0,5/0,5; ResNet ImageNet)."""
     cfg = getattr(model, "pretrained_cfg", {}) or {}

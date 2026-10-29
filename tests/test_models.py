@@ -19,3 +19,10 @@ def test_checkpoint_roundtrip_and_phone_photo_prediction(tmp_path):
     phone_photo = Image.new("RGB", (3024, 4032), (120, 90, 60))   # dikey telefon fotoğrafı
     pred = predict_image(loaded, meta, phone_photo)
     assert set(pred) == {"calories", "mass"} and pred["calories"] > -1   # expm1 çıktısı
+
+
+def test_regression_head_starts_at_train_mean():
+    from src.models import init_regression_head
+    model = init_regression_head(build_regressor("efficientnet_b0", n_outputs=3, pretrained=False)).eval()
+    out = model(torch.randn(2, 3, 64, 64))
+    assert torch.equal(out, torch.ones(2, 3))   # ölçeklenmiş hedefte 1 = train ortalaması
