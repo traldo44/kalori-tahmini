@@ -1,0 +1,22 @@
+model_id,model,bin,n,MAE
+naive_mean,Naif: train ortalaması,düşük,176,200.8102502458076
+naive_mean,Naif: train ortalaması,orta,159,54.41886889504336
+naive_mean,Naif: train ortalaması,yüksek,172,240.72106201397045
+cnn_xgb,Donmuş ResNet-50 + XGBoost,düşük,176,46.50225539946504
+cnn_xgb,Donmuş ResNet-50 + XGBoost,orta,159,54.28766968826237
+cnn_xgb,Donmuş ResNet-50 + XGBoost,yüksek,172,130.3066406186637
+resnet50_reg_timminit,ResNet-50 (timm başlatması),düşük,176,28.878460773012854
+resnet50_reg_timminit,ResNet-50 (timm başlatması),orta,159,43.06799868217804
+resnet50_reg_timminit,ResNet-50 (timm başlatması),yüksek,172,106.50111185118209
+resnet50_reg_mt,ResNet-50 çok görevli,düşük,176,28.079295213249598
+resnet50_reg_mt,ResNet-50 çok görevli,orta,159,43.39463140379708
+resnet50_reg_mt,ResNet-50 çok görevli,yüksek,172,102.16164265122525
+efficientnet_b0_reg,EfficientNet-B0,düşük,176,25.78740165653554
+efficientnet_b0_reg,EfficientNet-B0,orta,159,44.249637099931824
+efficientnet_b0_reg,EfficientNet-B0,yüksek,172,88.45485718305721
+vit_b16_reg,ViT-B/16,düşük,176,16.11913652108474
+vit_b16_reg,ViT-B/16,orta,159,36.489920418217494
+vit_b16_reg,ViT-B/16,yüksek,172,89.24727435444676
+convnext_tiny_reg,ConvNeXt-T,düşük,176,16.239681439643558
+convnext_tiny_reg,ConvNeXt-T,orta,159,31.578522736171507
+convnext_tiny_reg,ConvNeXt-T,yüksek,172,76.35269701758097
