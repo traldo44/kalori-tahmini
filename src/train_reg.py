@@ -18,7 +18,7 @@ import torch
 from .config import CALORIE_BIN_EDGES, CHECKPOINT_DIR, IMG_SIZE, set_seed, get_device
 from .data import TARGETS, Nutrition5kDataset, load_n5k_split, make_val_split, read_dish_metadata
 from .metrics import classification_metrics, regression_metrics, to_bins
-from .models import build_model, decode_target, encode_target, model_norm, save_checkpoint
+from .models import build_model, decode_target, encode_target, init_regression_head, model_norm, save_checkpoint
 from .results import log_result, save_preds
 from .trainer import fit, history_path, loader, predict
 from .transforms import calorie_transform
@@ -62,7 +62,7 @@ def main():
     if args.limit:
         train_ids, val_ids, test_ids = train_ids[:args.limit], val_ids[:args.limit], test_ids[:args.limit]
 
-    model = build_model(args.backbone, n_outputs=len(targets), pretrained=True).to(device)
+    model = init_regression_head(build_model(args.backbone, n_outputs=len(targets), pretrained=True)).to(device)
     mean, std = model_norm(model)
     y_train = torch.tensor([[meta[d][t] for t in targets] for d in train_ids])
     scale = encode_target(y_train, args.target_transform).mean(0)  # her hedef ~1 civarında olsun

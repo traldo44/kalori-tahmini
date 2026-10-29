@@ -68,7 +68,7 @@ def bootstrap_ci(y_true, y_pred, metric_fn, n_boot=1000, alpha=0.05, seed=SEED):
 def paired_bootstrap(y_true, pred_a, pred_b, metric_fn=mae, n_boot=1000, alpha=0.05, seed=SEED):
     """İki modeli AYNI tabaklar üzerinde karşılaştırır: fark = metrik(A) − metrik(B).
 
-    MAE için fark < 0 ise A daha iyi. Güven aralığı 0'ı içermiyorsa fark anlamlıdır
+    MAE için fark < 0 ise A daha iyi (F1 gibi yüksek-iyi metriklerde tersi). Güven aralığı 0'ı içermiyorsa fark anlamlıdır
     ("significant": True); içeriyorsa "A daha iyi" demek için yeterli kanıt yok.
     """
     y, a, b = np.asarray(y_true), np.asarray(pred_a), np.asarray(pred_b)
