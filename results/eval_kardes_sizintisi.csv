@@ -1,0 +1,9 @@
+model,label,MAE_kardesli,ci_low_kardesli,ci_high_kardesli,n_kardesli,MAE_kardessiz,ci_low_kardessiz,ci_high_kardessiz,n_kardessiz,oran
+naive_mean,Naif,167.82,139.92,196.28,111,168.61,156.7,180.99,396,1.0
+vlm_gemini_3_5_flash_lite,VLM (Flash-Lite),81.41,64.54,101.71,111,82.29,73.25,91.33,396,0.99
+cnn_xgb,ResNet-50 + XGBoost,74.05,57.73,91.11,111,78.31,70.89,86.51,396,0.95
+resnet50_reg_timminit,ResNet-50,66.1,51.9,83.15,111,57.86,51.92,64.16,396,1.14
+resnet50_reg_mt,ResNet-50 çok görevli,56.04,42.16,71.47,111,58.57,52.72,64.81,396,0.96
+efficientnet_b0_reg,EfficientNet-B0,50.78,38.64,64.03,111,53.41,47.62,59.76,396,0.95
+vit_b16_reg,ViT-B/16,45.55,33.6,59.38,111,47.81,42.65,53.51,396,0.95
+convnext_tiny_reg,ConvNeXt-T,44.99,32.64,59.08,111,40.45,35.73,45.72,396,1.11
