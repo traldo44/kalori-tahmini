@@ -55,6 +55,7 @@ MODEL_NAMES = {
     "efficientnet_b0_reg": "EfficientNet-B0",
     "vit_b16_reg": "ViT-B/16",
     "convnext_tiny_reg": "ConvNeXt-T",
+    "vlm_gemini_3_5_flash_lite": "VLM sıfır-atış (Gemini 3.5 Flash-Lite)",
     "resnet50_cls": "ResNet-50",
     "efficientnet_b0_cls": "EfficientNet-B0",
     "convnext_tiny_cls": "ConvNeXt-T",
@@ -63,9 +64,10 @@ MODEL_NAMES = {
 # Tablo 1 (sınıflandırma) ve Tablo 2 (kalori) satırları, README'deki sırayla
 TABLO1_MODELS = ["naive_most_frequent", "cnn_logreg", "resnet50_cls", "efficientnet_b0_cls", "convnext_tiny_cls", "vit_b16_cls"]
 TABLO2_MODELS = ["naive_mean", "cnn_xgb", "resnet50_reg_timminit", "resnet50_reg", "resnet50_reg_mt",
-                 "efficientnet_b0_reg_timminit", "efficientnet_b0_reg", "vit_b16_reg", "convnext_tiny_reg"]
+                 "efficientnet_b0_reg_timminit", "efficientnet_b0_reg", "vit_b16_reg", "convnext_tiny_reg",
+                 "vlm_gemini_3_5_flash_lite"]
 # Model karşılaştırma figürü ve aralık başına MAE: kötü/yinelenen run'lar hariç
-COMPARE_MODELS = ["naive_mean", "cnn_xgb", "resnet50_reg_timminit", "resnet50_reg_mt",
+COMPARE_MODELS = ["naive_mean", "vlm_gemini_3_5_flash_lite", "cnn_xgb", "resnet50_reg_timminit", "resnet50_reg_mt",
                   "efficientnet_b0_reg", "vit_b16_reg", "convnext_tiny_reg"]
 HISTORY_REG = ["convnext_tiny_reg", "vit_b16_reg", "efficientnet_b0_reg", "resnet50_reg_mt", "resnet50_reg_timminit", "resnet50_reg"]
 HISTORY_CLS = ["vit_b16_cls", "convnext_tiny_cls", "efficientnet_b0_cls", "resnet50_cls"]

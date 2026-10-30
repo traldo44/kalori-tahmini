@@ -2,6 +2,9 @@ model_id,model,bin,n,MAE
 naive_mean,Naif: train ortalaması,düşük,176,200.8102502458076
 naive_mean,Naif: train ortalaması,orta,159,54.41886889504336
 naive_mean,Naif: train ortalaması,yüksek,172,240.72106201397045
+vlm_gemini_3_5_flash_lite,VLM sıfır-atış (Gemini 3.5 Flash-Lite),düşük,176,28.74392254545455
+vlm_gemini_3_5_flash_lite,VLM sıfır-atış (Gemini 3.5 Flash-Lite),orta,159,80.66431238364781
+vlm_gemini_3_5_flash_lite,VLM sıfır-atış (Gemini 3.5 Flash-Lite),yüksek,172,138.0235091802326
 cnn_xgb,Donmuş ResNet-50 + XGBoost,düşük,176,46.50225539946504
 cnn_xgb,Donmuş ResNet-50 + XGBoost,orta,159,54.28766968826237
 cnn_xgb,Donmuş ResNet-50 + XGBoost,yüksek,172,130.3066406186637
