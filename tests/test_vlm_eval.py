@@ -190,3 +190,16 @@ def test_dry_run_end_to_end(tmp_path, capsys):
     vlm_eval.main(["--dry-run", "--root", str(root), "--out-dir", str(out), "--model", "fake-vlm"])
     assert len((out / "vlm" / "vlm_fake_vlm.jsonl").read_text().splitlines()) == 6
     assert "6 önceden bitmiş, 0 sorulacak" in capsys.readouterr().out
+
+
+def test_daily_quota_aborts_without_retry(monkeypatch):
+    """Günlük kota 429'u: tekrar denemeden DailyQuotaExhausted fırlatılır (beklemek anlamsız)."""
+    import src.vlm_eval as v
+    calls = []
+    body = {"error": {"code": 429, "details": [{"violations": [{"quotaId": "GenerateRequestsPerDayPerProjectPerModel-FreeTier"}]}]}}
+    monkeypatch.setattr(v, "http_post_json", lambda *a, **k: (calls.append(1), (429, body))[1])
+    monkeypatch.setattr(v, "sleep", lambda s: None)
+    import pytest
+    with pytest.raises(v.DailyQuotaExhausted):
+        v.call_vlm("gemini", "m", "key", "aGk=", "image/jpeg")
+    assert len(calls) == 1
