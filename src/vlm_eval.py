@@ -127,6 +127,10 @@ def extract_response(provider, body):
     return text, int(u.get("prompt_tokens", 0)), int(u.get("completion_tokens", 0))
 
 
+class DailyQuotaExhausted(RuntimeError):
+    """Sağlayıcının günlük istek kotası doldu; çalıştırma durur, yarın aynı komutla devam edilir."""
+
+
 def call_vlm(provider, model, api_key, image_b64, mime, base_url=None, thinking_budget=None, max_tries=5, timeout=120):
     """Bir görüntü için modeli çağırır; 429/5xx'te üstel bekleme ile en çok max_tries dener.
     Döner: {text, prompt_tokens, output_tokens, latency_s, tries, error}. error None değilse text None."""
@@ -144,6 +148,9 @@ def call_vlm(provider, model, api_key, image_b64, mime, base_url=None, thinking_
                         "error": f"beklenmeyen yanıt yapısı ({e}): {str(body)[:300]}"}
             return {"text": text, "prompt_tokens": p_tok, "output_tokens": o_tok, "latency_s": latency,
                     "tries": attempt, "error": None}
+        if status == 429 and "PerDay" in str(body):
+            # Günlük kota (ör. GenerateRequestsPerDayPerProjectPerModel-FreeTier = 20): beklemek anlamsız.
+            raise DailyQuotaExhausted(f"HTTP 429 günlük kota: {str(body)[:2000]}")
         if status not in RETRY_STATUS or attempt == max_tries:
             break
         sleep(min(60, 2 ** attempt))   # 2, 4, 8, 16 s
@@ -324,8 +331,13 @@ def main(argv=None):
         if args.dry_run:
             rec = fake_call(d)
         else:
-            rec = call_vlm(args.provider, args.model, api_key, b64, mime, args.base_url, args.thinking_budget,
-                           args.max_tries, args.timeout)
+            try:
+                rec = call_vlm(args.provider, args.model, api_key, b64, mime, args.base_url, args.thinking_budget,
+                               args.max_tries, args.timeout)
+            except DailyQuotaExhausted as e:
+                print(f"\n✗ {e}\n  {len(done)} tabak bitti, {len(todo) - i + 1} tabak kaldı. Kota yenilenince aynı komutu "
+                      f"tekrar verin; bitmiş tabaklar {jsonl_path} içinden atlanır.", flush=True)
+                sys.exit(3)
         parsed = parse_response(rec["text"]) if rec["error"] is None else None
         rec.update({"dish_id": d, "y_true": meta[d]["calories"], "model": args.model, "provider": args.provider,
                     "parsed_total": parsed["total_kcal"] if parsed else None, "items": parsed["items"] if parsed else None,
