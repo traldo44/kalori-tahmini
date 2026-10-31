@@ -262,11 +262,11 @@ Adımlar sırayla yapılır; her adımın bir çıktısı ve bir "bitti" kriteri
 | 19 | 9 | Demo: fotoğraf yükle → kcal (`app.py` iskeleti hazır) + kendi fotoğraflarımızla test (§7 Faz 4) | Çalışan demo, kısa bir video kaydı, `own_photos` satırları |
 | 20 | 9 | Toparlama: figürlerin son hali, kod temizliği, README | `main` dalında baştan sona çalışan kod. **Kontrol noktası 3** |
 
-**Durum (30 Ekim):** Adım 1–16 ✅ · Adım 17 ⏳ (Kaggle) · Kontrol noktası 1 ✅ · Kontrol noktası 2 ✅
+**Durum (1 Kasım):** Adım 1–16 ✅ · Adım 17 ⏳ (Kaggle) · Adım 19 demo tarafı ✅ (fotoğraflar bekleniyor) · Kontrol noktası 1 ✅ · Kontrol noktası 2 ✅
 
 **Sıradaki adım:**
 1. **Adım 17**: `notebooks/12_ablation_kaggle_adim17.ipynb` → Kaggle'a Import → GPU T4 x2 + Internet + Secrets `GH_TOKEN` → Save & Run All (Commit), ~3,5 sa. Dört ablation: ConvNeXt-T çok görevli, `log1p` hedef, augmentasyonsuz, ViT-B/16 384 px. Sonuçlar kendiliğinden `results.csv`'ye gider; sonra `python -m src.make_figures` ile tablolar yenilenir ve ablation tablosu §2'ye yazılır.
-2. **Adım 19 hazırlığı** eğitimden bağımsız: 15–20 tabak fotoğrafı + tartı (§7 Faz 4).
+2. **Adım 19 fotoğrafları** eğitimden bağımsız: 15–20 tabak fotoğrafı + tartı (§7 Faz 4). Demo ve dış-test betiği hazır ve ConvNeXt-T checkpoint'iyle doğrulandı (1 Kasım): `python app.py` demoyu açar (varsayılan checkpoint `checkpoints/convnext_tiny_reg.pt`, Mac CPU'da tabak başına ~0,2 s); fotoğraflar `own_photos/` + `labels.csv`'ye konunca `python -m src.eval_own_photos --ckpt checkpoints/convnext_tiny_reg.pt --model convnext_tiny_reg` sonucu `results.csv`'ye yazar. Adım 18'de final model değişirse aynı komutlar o checkpoint'le tekrarlanır.
 
 ---
 
@@ -616,6 +616,7 @@ Bu dosyanın kapsamı dışında; bilgi için:
 
 | Tarih | Kim | Son tamamlanan adım | Yarım kalan iş / sıradaki adım | Notlar (değişen ayarlar, sorunlar) |
 | --- | --- | --- | --- | --- |
+| 2026-11-01 | traldo | Adım 19 demo tarafı ✅ (Kaggle sonucu beklenirken) | Adım 17: Kaggle'da notebook 12 → sonuçlar; Adım 19: 15–20 tabak fotoğrafı çek | `app.py` (Gradio 6.31) ve `src.eval_own_photos` gerçek ConvNeXt-T checkpoint'iyle uçtan uca denendi: demo tahminleri `results/preds/convnext_tiny_reg.csv` ile birebir, arayüz açılıyor, `own_photos` / `_ust` / `_yan` satırları yazılıyor (deneme 5 Nutrition5k görüntüsüyle yapıldı, `results.csv`'ye yazılmadı). `app.py --ckpt` artık varsayılan olarak `checkpoints/convnext_tiny_reg.pt` |
 | 2026-10-30 | traldo | Adım 16 ✅ (kardeş-sızıntısı ölçümü: etkisi yok) + Adım 17 hazırlığı (notebook 12) | `notebooks/12_ablation_kaggle_adim17.ipynb`'yi Kaggle'da çalıştır (~3,5 sa) | `src/leakage.py` EDA'daki tanımı kullanır (zaman komşusu + iç içe malzeme). Notebook 12: ConvNeXt-T çok görevli / log1p / augmentasyonsuz (`--patience 10`), ViT-B/16 384 px (`--batch-size 16`). ViT-384 ağırlıkları Mac'e indirilmedi, Kaggle'da ilk kez çalışacak |
 | 2026-10-30 | traldo | Adım 15 ✅ (figürler, Tablo 1–3, Grad-CAM) + Adım 14 ✅ (Gemini 3.5 Flash-Lite 82,1 kcal, 507 tabak, iki günde) | Adım 16–17 ablation'ları | `src/make_figures.py` (9 figür + 3 md tablo), `src/gradcam.py`, `src/vlm_eval.py` (stdlib, devam edilebilir). Bulgular §2 "Değerlendirme bulguları": en büyük hatalar yeşillik altındaki proteinli yüksek kalorili tabaklar; apple pie en zayıf sınıf. `checkpoints/convnext_tiny_reg.pt` Mac'e indirildi (git dışı) |
 | 2026-10-30 | traldo | Adım 12–13 ✅ (Kaggle, notebook 11 ~2,5 sa) | Adım 14 (VLM: model + API anahtarı kararı bekliyor) · Adım 15 (figürler, `results/preds/`'ten Mac'te) | Sonuçlar §2 Tablo 1–2: ConvNeXt-T kalori 41,4 kcal, ViT-B/16 sınıflandırma F1 0,951. Düzeltilmiş başlatma EfficientNet-B0'ı 104 → 52,8'e indirdi; ResNet-50 ise `--patience 7` yüzünden 14. epoch'ta durup 68,7'ye kötüleşti (eski 59,7 run'ı `*_timminit` adıyla duruyor ve raporda kullanılabilir). Çok görevli ResNet-50 58,0 (tek görevliden anlamlı farklı değil). Checkpoint'lerin hepsi Release `checkpoints`'ta. Balıklı/balıksız MAE Tablo 2'ye eklendi |
