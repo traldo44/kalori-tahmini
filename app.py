@@ -1,6 +1,7 @@
 """Demo (Adım 19): fotoğraf yükle → tahmini kcal.
 
-    python app.py --ckpt checkpoints/best.pt
+    python app.py                      # varsayılan: checkpoints/convnext_tiny_reg.pt (Adım 13 en iyisi)
+    python app.py --ckpt checkpoints/<baska>.pt
 """
 import argparse
 
@@ -54,7 +55,8 @@ def make_demo(model, meta, device):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ckpt", required=True)
+    ap.add_argument("--ckpt", default="checkpoints/convnext_tiny_reg.pt",
+                    help="GitHub Release'den: GH_TOKEN=$(gh auth token) python scripts/share_checkpoint.py download convnext_tiny_reg")
     ap.add_argument("--share", action="store_true", help="geçici herkese açık link (sunum için)")
     args = ap.parse_args()
     device = get_device()
