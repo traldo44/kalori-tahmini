@@ -290,12 +290,12 @@ Adımlar sırayla yapılır; her adımın bir çıktısı ve bir "bitti" kriteri
 | 19 | 9 | Demo: fotoğraf yükle → kcal (`app.py` iskeleti hazır) + kendi fotoğraflarımızla test (§7 Faz 4) | Çalışan demo, kısa bir video kaydı, `own_photos` satırları |
 | 20 | 9 | Toparlama: figürlerin son hali, kod temizliği, README | `main` dalında baştan sona çalışan kod. **Kontrol noktası 3** |
 
-**Durum (1 Kasım):** Adım 1–18 ✅ · Adım 19 demo tarafı ✅ (fotoğraflar bekleniyor) · Adım 20 ⏳ · Kontrol noktası 1 ✅ · Kontrol noktası 2 ✅
+**Durum (1 Kasım):** Adım 1–18 ✅ · Adım 19 web demosu ✅ (Space yüklemesi kullanıcıda; fotoğraflar bekleniyor) · Adım 20 ⏳ · Kontrol noktası 1 ✅ · Kontrol noktası 2 ✅
 
 **Adım 18 — final model (1 Kasım):** kalori için **ConvNeXt-T çok görevli** (`convnext_tiny_reg_mt`: 40,3 kcal; tek görevliyle fark anlamsız, kütle + makro çıktıları bedava), sınıflandırma için **ViT-B/16 384 px** (0,957; hız gerekiyorsa ConvNeXt-T 0,941 ile 6,5 kat hızlı). Final test ölçümleri `results.csv`'de (Adım 17 satırları, yeniden ölçüm gerekmedi: test bir kez, Kaggle'da ölçüldü); özet §1'de, "Bu çalışma" satırı §2 Hedeflerimiz'de. Checkpoint `checkpoints/convnext_tiny_reg_mt.pt` Mac'te (git dışı; Release'ten `GH_TOKEN=$(gh auth token) python scripts/share_checkpoint.py download convnext_tiny_reg_mt.pt`). Demo (`python app.py`) bu modelle doğrulandı: kalori CSV'deki tahminle birebir, altta kütle ve makrolar görünüyor. Adım 15'teki figürler ve hata analizi tek görevli ConvNeXt-T içindir; iki modelin tahminleri %99,3 korelasyonlu, "en kötü 20" listesinin 17'si ortak, bu yüzden analiz final model için de geçerli ve figürler yeniden üretilmedi (ekip isterse `python -m src.make_figures --reg-model convnext_tiny_reg_mt --reg-second convnext_tiny_reg` ve `python -m src.gradcam --ckpt checkpoints/convnext_tiny_reg_mt.pt`).
 
 **Sıradaki adım:**
-1. **Adım 19 fotoğrafları** (tek eksik sizden): 15–20 tabak fotoğrafı + tartı (§7 Faz 4). Fotoğraflar `own_photos/` + `labels.csv`'ye konunca `python -m src.eval_own_photos --ckpt checkpoints/convnext_tiny_reg_mt.pt --model convnext_tiny_reg_mt` sonucu `results.csv`'ye `own_photos`, `own_photos_ust`, `own_photos_yan` satırları olarak yazar. Demo: `python app.py` (Mac CPU'da tabak başına ~0,2 s); sunum için `--share`.
+1. **Adım 19 fotoğrafları** (tek eksik sizden): 15–20 tabak fotoğrafı + tartı (§7 Faz 4). Fotoğraflar `own_photos/` + `labels.csv`'ye konunca `python -m src.eval_own_photos --ckpt checkpoints/convnext_tiny_reg_mt.pt --model convnext_tiny_reg_mt` sonucu `results.csv`'ye `own_photos`, `own_photos_ust`, `own_photos_yan` satırları olarak yazar. Demo: `python app.py` (Mac CPU'da tabak başına ~0,2 s); telefondan kalıcı adres için `python scripts/deploy_space.py` (§7 "Web demosu"; Claude bu komutu çalıştıramaz, kullanıcı çalıştırır).
 2. **Adım 20 — toparlama (kontrol noktası 3):** kod temizliği, figürlerin son hali, README'nin rapor için sadeleştirilmesi; `main` baştan sona çalışır durumda.
 
 ---
@@ -370,9 +370,12 @@ kalori-tahmini/
 │   ├── download_nutrition5k.py  ← gsutil'siz indirme (Mac ve Kaggle)           ✅
 │   ├── get_food101.py           ← Food-101 25 sınıflık alt küme: build / fetch   ✅
 │   └── share_checkpoint.py      ← checkpoint'leri GitHub Release ile paylaş (§6.4) ✅
+│   └── deploy_space.py    ← demoyu Hugging Face Space'e yükler (Adım 19)         ✅
 ├── tests/                 ← python -m pytest -q
-├── app.py                 ← Gradio demosu (Adım 19)                            ✅ (iskelet)
-├── own_photos/            ← kendi fotoğraflarımız + labels.csv (§7, Faz 4)
+├── app.py                 ← Gradio demosu, telefon uyumlu (kamera/galeri)  ✅
+├── demo_ornekleri/        ← demodaki 4 örnek tabak + gerçek kalorileri             ✅
+├── space/                 ← Hugging Face Space README + requirements (deploy_space)  ✅
+├── own_photos/            ← kendi fotoğraflarımız + labels.csv (§7, Faz 4)    ⬜ fotoğraf bekliyor
 ├── results/
 │   ├── results.csv        ← ORTAK: her deneyin sonucu buraya
 │   ├── preds/             ← her modelin test tahminleri (git'te)
@@ -576,7 +579,19 @@ Nutrition5k tek bir kafeteryada, sabit üst kamerayla çekildi. Telefon fotoğra
    ```
 5. Final modelle (Adım 18): `python -m src.eval_own_photos --ckpt checkpoints/convnext_tiny_reg_mt.pt --model convnext_tiny_reg_mt`. Sonuç `results.csv`'ye `own_photos`, `own_photos_ust` ve `own_photos_yan` satırları olarak yazılır.
 
-Raporda: Nutrition5k test MAE'si ile kendi fotoğraflarımızdaki MAE yan yana; üstten ile yandan arasındaki fark "sınırlılıklar" bölümüne. Demo (`app.py`) kullanıcıya nasıl çekmesi gerektiğini söyler, modelin gördüğü kırpılmış görüntüyü ve modelin test kümesindeki tipik hatasını gösterir.
+Raporda: Nutrition5k test MAE'si ile kendi fotoğraflarımızdaki MAE yan yana; üstten ile yandan arasındaki fark "sınırlılıklar" bölümüne.
+
+#### Web demosu (telefondan çek / yükle → kcal)
+
+`app.py` Gradio arayüzü telefon için düzenlendi: kamera (arka kamera) veya galeri, büyük kcal sonucu, altında kütle ve makrolar, açılır bölümlerde "modelin gördüğü" kırpma, çekim talimatı ve model/sonuç özeti; `demo_ornekleri/`'ndeki 4 test tabağı tek dokunuşla denenir (gerçek kalorileri açılır tabloda). Üç çalıştırma yolu:
+
+| Yol | Komut | Ne zaman |
+| --- | --- | --- |
+| **Kalıcı adres (hocaya gösterilecek)** | `python scripts/deploy_space.py` → `https://huggingface.co/spaces/traldo/kalori-tahmini` (doğrudan uygulama: `https://traldo-kalori-tahmini.hf.space`) | Bir kez yüklenir, ücretsiz CPU'da sürekli açık; kod değişince `--no-ckpt` ile güncellenir. `hf auth login` gerekir |
+| Aynı Wi-Fi | `python app.py --lan` → ekrana yazılan `http://<mac-ip>:7860` | Sunum odasında Mac ve telefon aynı ağdaysa, internet gerekmez |
+| Geçici link | `python app.py --share` → `*.gradio.live` | Yedek; Mac açık kaldığı sürece çalışır (72 sa) |
+
+Space, bu repodan `app.py`, `src/{config,transforms,models}.py`, `demo_ornekleri/`, `space/README.md`, `space/requirements.txt` (torch CPU) ve `checkpoints/convnext_tiny_reg_mt.pt` (111 MB) dosyalarını alır; ilk kurulum 3–5 dk. Space'te elle düzenleme yapılmaz, her değişiklik repodan gönderilir.
 
 ### Faz 5 — İyileştirme (Gün 6–8)
 
@@ -647,6 +662,7 @@ Bu dosyanın kapsamı dışında; bilgi için:
 
 | Tarih | Kim | Son tamamlanan adım | Yarım kalan iş / sıradaki adım | Notlar (değişen ayarlar, sorunlar) |
 | --- | --- | --- | --- | --- |
+| 2026-11-01 | traldo | Adım 19 web demosu ✅ (telefon uyumlu `app.py`, `demo_ornekleri/`, `space/`, `scripts/deploy_space.py`) | `python scripts/deploy_space.py` (kullanıcı; Claude'un yayınlaması engellendi) · kendi fotoğraflar · Adım 20 | Gradio 6: `sources=["upload","webcam"]`, arka kamera `WebcamOptions(constraints=facingMode environment)`; `--lan` aynı ağdan erişim; Space ücretsiz CPU, torch CPU wheel'i `space/requirements.txt`'te. `eval_own_photos` boş `labels.csv`'de artık açık hata veriyor |
 | 2026-11-01 | traldo | Adım 18 ✅ (final: ConvNeXt-T çok görevli 40,3 kcal; ViT-B/16 384 px F1 0,957) | Adım 19: kendi fotoğraflarımız (kullanıcıdan) · Adım 20: toparlama | `convnext_tiny_reg_mt.pt` Mac'e indirildi (111 MB), `app.py` varsayılanı bu checkpoint; demo doğrulandı (kütle + makrolar görünür). §1'e sonuç özeti, §2 Hedeflerimiz'e "Bu çalışma" satırı. Adım 15 figürleri tek görevli model için; tahminler %99,3 korelasyonlu, en kötü 20'nin 17'si ortak → yeniden üretilmedi |
 | 2026-11-01 | traldo | Adım 17 ✅ (Kaggle notebook 12, ~4 sa; sonuçlar §2 "Ablation bulguları") | Adım 18: final model kararı (öneri: ConvNeXt-T çok görevli + ViT-B/16 384 px) · Adım 19 fotoğrafları · Adım 20 | Çok görevli ConvNeXt-T 40,3 (tek görevliden farkı anlamsız, kütle 25,5 g / makrolar 3–5 g), `log1p` 43,3 (anlamsız, MAPE iyileşir), artırmasız 46,2 (anlamlı kötü), ViT-384 F1 0,957 (anlamlı ama 4 kat yavaş). `--patience 10` ile hiçbir run erken durmadı. `src.make_figures` artık `results/tablo_ablation.md` de yazar; `src.leakage` çok görevli modeli de ölçer (oran 1,05). `convnext_tiny_reg_mt.pt` Release'te, Mac'e indirilmedi |
 | 2026-11-01 | traldo | Adım 19 demo tarafı ✅ (Kaggle sonucu beklenirken) | Adım 17: Kaggle'da notebook 12 → sonuçlar; Adım 19: 15–20 tabak fotoğrafı çek | `app.py` (Gradio 6.31) ve `src.eval_own_photos` gerçek ConvNeXt-T checkpoint'iyle uçtan uca denendi: demo tahminleri `results/preds/convnext_tiny_reg.csv` ile birebir, arayüz açılıyor, `own_photos` / `_ust` / `_yan` satırları yazılıyor (deneme 5 Nutrition5k görüntüsüyle yapıldı, `results.csv`'ye yazılmadı). `app.py --ckpt` artık varsayılan olarak `checkpoints/convnext_tiny_reg.pt` |
