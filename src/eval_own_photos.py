@@ -6,6 +6,8 @@ own_photos/labels.csv sütunları: file, calories, angle (ust | yan), source, no
 Sonuç results.csv'ye split=own_photos (tümü) ve own_photos_ust / own_photos_yan olarak yazılır.
 """
 import argparse
+import pathlib
+import sys
 
 import pandas as pd
 from PIL import Image
@@ -27,6 +29,12 @@ def main():
     args = ap.parse_args()
 
     df = pd.read_csv(f"{args.dir}/labels.csv")
+    if df.empty:
+        sys.exit(f"{args.dir}/labels.csv boş: önce fotoğrafları {args.dir}/ içine koyup satırları doldurun "
+                 "(README §7 'Kendi fotoğraflarımızla test'). Örnek satır: tabak01_ust.jpg,520,ust,tartı+TürKomp,pilav 180 g + tavuk 120 g")
+    missing = [f for f in df["file"] if not (pathlib.Path(args.dir) / f).exists()]
+    if missing:
+        sys.exit(f"labels.csv'de olup klasörde bulunmayan dosyalar: {missing}")
     device = get_device()
     model, meta = load_checkpoint(args.ckpt, device)
     df["pred"] = [predict_image(model, meta, Image.open(f"{args.dir}/{f}"), device)["calories"] for f in df["file"]]
