@@ -290,12 +290,12 @@ Adımlar sırayla yapılır; her adımın bir çıktısı ve bir "bitti" kriteri
 | 19 | 9 | Demo: fotoğraf yükle → kcal (`app.py` iskeleti hazır) + kendi fotoğraflarımızla test (§7 Faz 4) | Çalışan demo, kısa bir video kaydı, `own_photos` satırları |
 | 20 | 9 | Toparlama: figürlerin son hali, kod temizliği, README | `main` dalında baştan sona çalışan kod. **Kontrol noktası 3** |
 
-**Durum (1 Kasım):** Adım 1–18 ✅ · Adım 19 web demosu ✅ (Space yüklemesi kullanıcıda; fotoğraflar bekleniyor) · Adım 20 ⏳ · Kontrol noktası 1 ✅ · Kontrol noktası 2 ✅
+**Durum (1 Kasım):** Adım 1–18 ✅ · Adım 19 web demosu ✅ (`web/` Vercel'e bağlanacak; fotoğraflar bekleniyor) · Adım 20 ⏳ · Kontrol noktası 1 ✅ · Kontrol noktası 2 ✅
 
 **Adım 18 — final model (1 Kasım):** kalori için **ConvNeXt-T çok görevli** (`convnext_tiny_reg_mt`: 40,3 kcal; tek görevliyle fark anlamsız, kütle + makro çıktıları bedava), sınıflandırma için **ViT-B/16 384 px** (0,957; hız gerekiyorsa ConvNeXt-T 0,941 ile 6,5 kat hızlı). Final test ölçümleri `results.csv`'de (Adım 17 satırları, yeniden ölçüm gerekmedi: test bir kez, Kaggle'da ölçüldü); özet §1'de, "Bu çalışma" satırı §2 Hedeflerimiz'de. Checkpoint `checkpoints/convnext_tiny_reg_mt.pt` Mac'te (git dışı; Release'ten `GH_TOKEN=$(gh auth token) python scripts/share_checkpoint.py download convnext_tiny_reg_mt.pt`). Demo (`python app.py`) bu modelle doğrulandı: kalori CSV'deki tahminle birebir, altta kütle ve makrolar görünüyor. Adım 15'teki figürler ve hata analizi tek görevli ConvNeXt-T içindir; iki modelin tahminleri %99,3 korelasyonlu, "en kötü 20" listesinin 17'si ortak, bu yüzden analiz final model için de geçerli ve figürler yeniden üretilmedi (ekip isterse `python -m src.make_figures --reg-model convnext_tiny_reg_mt --reg-second convnext_tiny_reg` ve `python -m src.gradcam --ckpt checkpoints/convnext_tiny_reg_mt.pt`).
 
 **Sıradaki adım:**
-1. **Adım 19 fotoğrafları** (tek eksik sizden): 15–20 tabak fotoğrafı + tartı (§7 Faz 4). Fotoğraflar `own_photos/` + `labels.csv`'ye konunca `python -m src.eval_own_photos --ckpt checkpoints/convnext_tiny_reg_mt.pt --model convnext_tiny_reg_mt` sonucu `results.csv`'ye `own_photos`, `own_photos_ust`, `own_photos_yan` satırları olarak yazar. Demo: `python app.py` (Mac CPU'da tabak başına ~0,2 s); telefondan kalıcı adres için `python scripts/deploy_space.py` (§7 "Web demosu"; Claude bu komutu çalıştıramaz, kullanıcı çalıştırır).
+1. **Adım 19 fotoğrafları** (tek eksik sizden): 15–20 tabak fotoğrafı + tartı (§7 Faz 4). Fotoğraflar `own_photos/` + `labels.csv`'ye konunca `python -m src.eval_own_photos --ckpt checkpoints/convnext_tiny_reg_mt.pt --model convnext_tiny_reg_mt` sonucu `results.csv`'ye `own_photos`, `own_photos_ust`, `own_photos_yan` satırları olarak yazar. Demo: `python app.py` (Mac'te) veya Vercel'deki statik sürüm (§7 "Web demosu"; Vercel projesini kullanıcı bağlar: Root Directory `web`).
 2. **Adım 20 — toparlama (kontrol noktası 3):** kod temizliği, figürlerin son hali, README'nin rapor için sadeleştirilmesi; `main` baştan sona çalışır durumda.
 
 ---
@@ -371,9 +371,11 @@ kalori-tahmini/
 │   ├── get_food101.py           ← Food-101 25 sınıflık alt küme: build / fetch   ✅
 │   └── share_checkpoint.py      ← checkpoint'leri GitHub Release ile paylaş (§6.4) ✅
 │   └── deploy_space.py    ← demoyu Hugging Face Space'e yükler (Adım 19)         ✅
+│   └── export_onnx.py     ← final checkpoint → web/model.onnx (int8) + doğruluk kontrolü  ✅
 ├── tests/                 ← python -m pytest -q
 ├── app.py                 ← Gradio demosu, telefon uyumlu (kamera/galeri)  ✅
 ├── demo_ornekleri/        ← demodaki 4 örnek tabak + gerçek kalorileri             ✅
+├── web/                   ← Vercel'e giden statik demo: index/style/app.js, model.onnx (28 MB), ornekler/  ✅
 ├── space/                 ← Hugging Face Space README + requirements (deploy_space)  ✅
 ├── own_photos/            ← kendi fotoğraflarımız + labels.csv (§7, Faz 4)    ⬜ fotoğraf bekliyor
 ├── results/
@@ -587,11 +589,12 @@ Raporda: Nutrition5k test MAE'si ile kendi fotoğraflarımızdaki MAE yan yana; 
 
 | Yol | Komut | Ne zaman |
 | --- | --- | --- |
-| **Kalıcı adres (hocaya gösterilecek)** | `python scripts/deploy_space.py` → `https://huggingface.co/spaces/traldo/kalori-tahmini` (doğrudan uygulama: `https://traldo-kalori-tahmini.hf.space`) | Bir kez yüklenir, ücretsiz CPU'da sürekli açık; kod değişince `--no-ckpt` ile güncellenir. `hf auth login` gerekir |
+| **Kalıcı adres (hocaya gösterilecek): Vercel, statik** | `web/` klasörü; model tarayıcıda çalışır (`web/model.onnx`, int8, 28 MB; `python scripts/export_onnx.py` üretir). Vercel'de proje → repo `traldo44/kalori-tahmini`, Root Directory `web`, Framework `Other` | Sunucu yok, ücretsiz, kalıcı; her `main` push'unda kendiliğinden yeniden yayınlanır. Telefon ilk açılışta modeli bir kez indirir (28 MB), sonra önbellekte. Fotoğraf cihazdan çıkmaz |
+| Hugging Face Space (denendi, olmadı) | `python scripts/deploy_space.py` | Gradio Space'ler ücretsiz hesapta artık yok (402, PRO ister); dosyalar `space/` altında duruyor |
 | Aynı Wi-Fi | `python app.py --lan` → ekrana yazılan `http://<mac-ip>:7860` | Sunum odasında Mac ve telefon aynı ağdaysa, internet gerekmez |
 | Geçici link | `python app.py --share` → `*.gradio.live` | Yedek; Mac açık kaldığı sürece çalışır (72 sa) |
 
-Space, bu repodan `app.py`, `src/{config,transforms,models}.py`, `demo_ornekleri/`, `space/README.md`, `space/requirements.txt` (torch CPU) ve `checkpoints/convnext_tiny_reg_mt.pt` (111 MB) dosyalarını alır; ilk kurulum 3–5 dk. Space'te elle düzenleme yapılmaz, her değişiklik repodan gönderilir.
+**`web/` (Vercel) nasıl çalışır:** `scripts/export_onnx.py` final checkpoint'i, ön işleme (ImageNet normalizasyonu) ve son işleme (ölçek, ≥ 0) grafiğe gömülü olarak ONNX'e çevirir ve ağırlıkları dinamik int8'e küçültür (111 → 28 MB). Doğruluk kontrolü aynı betikte: 100 test tabağında torch MAE 39,9, int8 ONNX 40,0 (`web/model.json`). Sayfa (`index.html`, `style.css`, `app.js`, çerçeve yok) onnxruntime-web 1.31.1'i CDN'den alır, fotoğrafı `crop_to_aspect` ile aynı kuralla 4:3 kırpıp 224×224'e küçültür, tahmini cihazda yapar (Mac'te ~0,3 s, telefonda 1–3 s). Aynı Gradio demosundaki sonuç kartı: kcal, ±40 aralık, günlük oran, düşük/orta/yüksek etiketi, porsiyon ve makro çubukları; 4 örnek tabak; `?ornek=3` ile örnek otomatik çalışır (test ve paylaşım için). Telefon görünümü (390 px, açık/koyu) ve çıkarım headless Chrome + DevTools protokolüyle doğrulandı. Model değişirse `python scripts/export_onnx.py` yeniden çalıştırılır ve `web/model.onnx` commit edilir (git'te 28 MB; `vercel.json` modeli bir yıl önbelleğe aldırır, bu yüzden model değişince dosya adı da değiştirilmeli).
 
 ### Faz 5 — İyileştirme (Gün 6–8)
 
@@ -662,6 +665,7 @@ Bu dosyanın kapsamı dışında; bilgi için:
 
 | Tarih | Kim | Son tamamlanan adım | Yarım kalan iş / sıradaki adım | Notlar (değişen ayarlar, sorunlar) |
 | --- | --- | --- | --- | --- |
+| 2026-11-01 | traldo | Adım 19 web demosu, Vercel sürümü ✅ (`web/`: tarayıcı içi ONNX, `scripts/export_onnx.py`) | Vercel'de projeyi bağla (Root Directory `web`) · kendi fotoğraflar · Adım 20 | HF Gradio Space ücretsiz hesapta kapandı (402). Model int8 ONNX 28 MB, doğruluk kaybı yok (100 tabakta 39,9 → 40,0). Sayfa çerçevesiz HTML/JS, onnxruntime-web CDN; Gradio demosu (`app.py`) sade temayla yeniden tasarlandı, ikisi aynı sonuç kartını gösterir. `onnx`, `onnxruntime` requirements'a eklendi |
 | 2026-11-01 | traldo | Adım 19 web demosu ✅ (telefon uyumlu `app.py`, `demo_ornekleri/`, `space/`, `scripts/deploy_space.py`) | `python scripts/deploy_space.py` (kullanıcı; Claude'un yayınlaması engellendi) · kendi fotoğraflar · Adım 20 | Gradio 6: `sources=["upload","webcam"]`, arka kamera `WebcamOptions(constraints=facingMode environment)`; `--lan` aynı ağdan erişim; Space ücretsiz CPU, torch CPU wheel'i `space/requirements.txt`'te. `eval_own_photos` boş `labels.csv`'de artık açık hata veriyor |
 | 2026-11-01 | traldo | Adım 18 ✅ (final: ConvNeXt-T çok görevli 40,3 kcal; ViT-B/16 384 px F1 0,957) | Adım 19: kendi fotoğraflarımız (kullanıcıdan) · Adım 20: toparlama | `convnext_tiny_reg_mt.pt` Mac'e indirildi (111 MB), `app.py` varsayılanı bu checkpoint; demo doğrulandı (kütle + makrolar görünür). §1'e sonuç özeti, §2 Hedeflerimiz'e "Bu çalışma" satırı. Adım 15 figürleri tek görevli model için; tahminler %99,3 korelasyonlu, en kötü 20'nin 17'si ortak → yeniden üretilmedi |
 | 2026-11-01 | traldo | Adım 17 ✅ (Kaggle notebook 12, ~4 sa; sonuçlar §2 "Ablation bulguları") | Adım 18: final model kararı (öneri: ConvNeXt-T çok görevli + ViT-B/16 384 px) · Adım 19 fotoğrafları · Adım 20 | Çok görevli ConvNeXt-T 40,3 (tek görevliden farkı anlamsız, kütle 25,5 g / makrolar 3–5 g), `log1p` 43,3 (anlamsız, MAPE iyileşir), artırmasız 46,2 (anlamlı kötü), ViT-384 F1 0,957 (anlamlı ama 4 kat yavaş). `--patience 10` ile hiçbir run erken durmadı. `src.make_figures` artık `results/tablo_ablation.md` de yazar; `src.leakage` çok görevli modeli de ölçer (oran 1,05). `convnext_tiny_reg_mt.pt` Release'te, Mac'e indirilmedi |

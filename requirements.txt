@@ -15,3 +15,5 @@ scipy==1.18.1
 nbconvert==7.17.2
 ipykernel==7.4.0
 scikit-image==0.26.0
+onnx==1.23.2
+onnxruntime==1.31.1
