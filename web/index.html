@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f6f5f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#161615" media="(prefers-color-scheme: dark)">
+<title>Kalori tahmini</title>
+<meta name="description" content="Tabağın üstten fotoğrafından kalori, porsiyon ve makro tahmini. Model tarayıcıda çalışır; fotoğraf hiçbir sunucuya gönderilmez.">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='none' stroke='%23444' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%23444' stroke-width='2'/%3E%3C/svg%3E">
+</head>
+<body>
+<main>
+  <header>
+    <h1>Kalori tahmini</h1>
+    <p>Tabağın üstten fotoğrafından kalori, porsiyon ve makro tahmini. Model telefonunuzda çalışır; fotoğraf hiçbir yere gönderilmez.</p>
+  </header>
+
+  <section class="giris" aria-label="Fotoğraf seç">
+    <label class="buton birincil">
+      <input type="file" accept="image/*" capture="environment" id="kamera">
+      Fotoğraf çek
+    </label>
+    <label class="buton">
+      <input type="file" accept="image/*" id="galeri">
+      Galeriden seç
+    </label>
+  </section>
+
+  <p id="durum" class="durum" aria-live="polite">Model hazırlanıyor…</p>
+
+  <section id="onizleme" class="onizleme" hidden>
+    <canvas id="kirpma" width="448" height="336" aria-label="Modelin gördüğü, 4:3 kırpılmış görüntü"></canvas>
+    <p class="kucuk">Modelin gördüğü (4:3 kırpma, 224 px'e küçültülür). Tabağın kenarı kesiliyorsa biraz uzaktan çekin.</p>
+  </section>
+
+  <section id="sonuc" class="sonuc" hidden aria-live="polite"></section>
+
+  <section id="bos" class="bos">
+    <strong>Nasıl çekilir?</strong>
+    <ol>
+      <li>Tabağı tam üstten, kuş bakışı çekin; yandan değil.</li>
+      <li>Tabak karenin yarısı ile üçte ikisi arasını doldursun.</li>
+      <li>Tek tabak, düz zemin, gölgesiz ışık.</li>
+    </ol>
+    Model bu koşullardaki tabaklarla eğitildi; yandan veya çok yakından çekimde sapma büyür.
+  </section>
+
+  <section class="ornekler" aria-label="Örnek tabaklar">
+    <h2>Denemek için örnek tabaklar</h2>
+    <div id="ornek-liste" class="ornek-liste"></div>
+    <p class="kucuk">Nutrition5k test kümesinden; gerçek değerler aşağıda.</p>
+  </section>
+
+  <details>
+    <summary>Örneklerin gerçek değerleri</summary>
+    <table id="ornek-tablo" class="tablo"><thead><tr><th>Örnek</th><th>Gerçek</th><th>Model (sunucu)</th></tr></thead><tbody></tbody></table>
+  </details>
+
+  <details>
+    <summary>Sınırlılıklar</summary>
+    <p>Model, Nutrition5k veri setindeki 2 752 tabakla eğitildi: tek bir kafeterya, sabit yükseklikte üst kamera, tabak başına tartılmış malzeme listesinden hesaplanan kalori. Telefon fotoğrafı bu koşullardan uzaklaştıkça (yandan açı, farklı mesafe, birden fazla tabak, paketli ürün) hata büyür.</p>
+    <p>Sonuç bir tahmindir: test kümesinde ortalama hata ±40 kcal; yüksek kalorili tabaklarda daha büyük. Tahminler bilgilendirme amaçlıdır; tıbbi veya diyet kararı için kullanılmaz.</p>
+  </details>
+
+  <details>
+    <summary>Model ve sonuçlar</summary>
+    <table class="tablo iki">
+      <tr><th>Model</th><td>ConvNeXt-T omurgası (ImageNet-12k ön eğitimli), çok görevli başlık: kalori, kütle, yağ, karbonhidrat, protein</td></tr>
+      <tr><th>Girdi</th><td>Yalnızca RGB fotoğraf, 224 px</td></tr>
+      <tr><th>Eğitim</th><td>Nutrition5k, 2 752 tabak (üst kamera)</td></tr>
+      <tr><th>Test, 507 tabak</th><td>MAE 40,3 kcal [%95 GA 36,2–45,3], PMAE %15,8, R² 0,90; tahminlerin %88'i ±100 kcal içinde</td></tr>
+      <tr><th>Karşılaştırma</th><td>Sıfır-atış VLM (Gemini 3.5 Flash-Lite) 82,1 kcal · klasik ML (donmuş ResNet-50 → XGBoost) 77,4 · Nutrition5k makalesi RGB 70,6</td></tr>
+      <tr><th>Bu sayfa</th><td id="model-bilgi">Model int8 ONNX olarak tarayıcıda (onnxruntime-web) çalışır.</td></tr>
+    </table>
+  </details>
+
+  <footer>
+    Bitirme projesi, 2026. <a href="https://github.com/traldo44/kalori-tahmini">Kaynak kod ve rapor</a>
+  </footer>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.31.1/dist/ort.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
