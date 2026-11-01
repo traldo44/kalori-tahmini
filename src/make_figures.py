@@ -55,22 +55,28 @@ MODEL_NAMES = {
     "efficientnet_b0_reg": "EfficientNet-B0",
     "vit_b16_reg": "ViT-B/16",
     "convnext_tiny_reg": "ConvNeXt-T",
+    "convnext_tiny_reg_mt": "ConvNeXt-T çok görevli",
+    "convnext_tiny_reg_log1p": "ConvNeXt-T, log1p hedef",
+    "convnext_tiny_reg_noaug": "ConvNeXt-T, artırmasız",
     "vlm_gemini_3_5_flash_lite": "VLM sıfır-atış (Gemini 3.5 Flash-Lite)",
     "resnet50_cls": "ResNet-50",
     "efficientnet_b0_cls": "EfficientNet-B0",
     "convnext_tiny_cls": "ConvNeXt-T",
     "vit_b16_cls": "ViT-B/16",
+    "vit_b16_384_cls": "ViT-B/16, 384 px",
 }
 # Tablo 1 (sınıflandırma) ve Tablo 2 (kalori) satırları, README'deki sırayla
-TABLO1_MODELS = ["naive_most_frequent", "cnn_logreg", "resnet50_cls", "efficientnet_b0_cls", "convnext_tiny_cls", "vit_b16_cls"]
+TABLO1_MODELS = ["naive_most_frequent", "cnn_logreg", "resnet50_cls", "efficientnet_b0_cls", "convnext_tiny_cls", "vit_b16_cls", "vit_b16_384_cls"]
 TABLO2_MODELS = ["naive_mean", "cnn_xgb", "resnet50_reg_timminit", "resnet50_reg", "resnet50_reg_mt",
                  "efficientnet_b0_reg_timminit", "efficientnet_b0_reg", "vit_b16_reg", "convnext_tiny_reg",
-                 "vlm_gemini_3_5_flash_lite"]
+                 "convnext_tiny_reg_mt", "convnext_tiny_reg_log1p", "convnext_tiny_reg_noaug", "vlm_gemini_3_5_flash_lite"]
 # Model karşılaştırma figürü ve aralık başına MAE: kötü/yinelenen run'lar hariç
 COMPARE_MODELS = ["naive_mean", "vlm_gemini_3_5_flash_lite", "cnn_xgb", "resnet50_reg_timminit", "resnet50_reg_mt",
-                  "efficientnet_b0_reg", "vit_b16_reg", "convnext_tiny_reg"]
+                  "efficientnet_b0_reg", "vit_b16_reg", "convnext_tiny_reg", "convnext_tiny_reg_mt"]
+# Ablation tablosu (Adım 17): ConvNeXt-T üzerinde tek tek değişiklikler; ilk eleman referans
+ABLATION_MODELS = ["convnext_tiny_reg", "convnext_tiny_reg_mt", "convnext_tiny_reg_log1p", "convnext_tiny_reg_noaug"]
 HISTORY_REG = ["convnext_tiny_reg", "vit_b16_reg", "efficientnet_b0_reg", "resnet50_reg_mt", "resnet50_reg_timminit", "resnet50_reg"]
-HISTORY_CLS = ["vit_b16_cls", "convnext_tiny_cls", "efficientnet_b0_cls", "resnet50_cls"]
+HISTORY_CLS = ["vit_b16_384_cls", "vit_b16_cls", "convnext_tiny_cls", "efficientnet_b0_cls", "resnet50_cls"]
 # Literatür referansları (README §2 tablosu): kcal MAE
 LITERATURE = [("Sıfır-atış VLM (Gemini 3.0 Flash)", 80.7), ("Nutrition5k RGB (JFT ön eğitimli)", 70.6)]
 LITERATURE_BAND = (37.0, 40.0, "Segmentasyon / tahmini derinlik")
@@ -182,6 +188,20 @@ def tablo3_md(results, models=TABLO2_MODELS):
                      f"{fmt_tr(r.f1, 3)} [{fmt_tr(r.f1_ci_low, 3)}–{fmt_tr(r.f1_ci_high, 3)}]"])
     return md_table(["Tablo 3 · Kalori aralığı (düşük < 116,1 ≤ orta < 313,7 ≤ yüksek kcal, test)",
                      "Doğruluk", "Precision (macro)", "Recall (macro)", "Macro-F1 [%95 GA]"], rows)
+
+
+def tablo_ablation_md(results, models=ABLATION_MODELS):
+    """Adım 17 ablation tablosu: referansa göre MAE farkı yalnızca nokta tahmin; güven aralığı için `src.compare`."""
+    base = results_row(results, "calorie", models[0]).MAE
+    rows = []
+    for m in models:
+        r = results_row(results, "calorie", m)
+        b = results_row(results, "calorie_bins", m)
+        d = r.MAE - base
+        rows.append([model_name(m), f"{fmt_tr(r.MAE)} [{fmt_tr(r.MAE_ci_low)}–{fmt_tr(r.MAE_ci_high)}]",
+                     "—" if m == models[0] else f"{'+' if d >= 0 else '−'}{fmt_tr(abs(d))}",
+                     fmt_tr(r.PMAE, 1, percent=True), fmt_tr(r.R2, 2), fmt_tr(r.within_100kcal, 1, percent=True), fmt_tr(b.f1, 3)])
+    return md_table(["Ablation (ConvNeXt-T, Nutrition5k test)", "MAE (kcal) [%95 GA]", "Δ MAE", "PMAE", "R²", "±100 kcal içinde", "Tablo 3 F1"], rows)
 
 
 # ---------------------------------------------------------------- veri okuma
@@ -491,7 +511,8 @@ def main(argv=None):
 
     # 10. tablolar
     for name, text in [("tablo1.md", tablo1_md(results)), ("tablo2.md", tablo2_md(results)),
-                       ("tablo3_kalori_araligi.md", tablo3_md(results))]:
+                       ("tablo3_kalori_araligi.md", tablo3_md(results)),
+                       ("tablo_ablation.md", tablo_ablation_md(results))]:
         (results_dir / name).write_text(text, encoding="utf-8")
         print(f"→ results/{name}\n{text}")
     return captions

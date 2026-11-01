@@ -104,7 +104,8 @@ Uçtan uca ince ayar, §6.1'deki ortak ayarlar (AdamW, omurga 1e-4 / başlık 1e
 | ResNet-50 (ince ayar) | %91,3 | 0,912 [0,905–0,919] | %99,0 | 23,6 M | 1,31 |
 | EfficientNet-B0 (ince ayar) | %91,7 | 0,917 [0,909–0,924] | %99,0 | 4,0 M | 0,70 |
 | ConvNeXt-T (ince ayar) | %94,1 | 0,941 [0,935–0,947] | %99,4 | 27,8 M | 1,49 |
-| **ViT-B/16 (ince ayar)** | **%95,1** | **0,951** [0,945–0,956] | %99,3 | 85,8 M | 2,40 |
+| ViT-B/16 (ince ayar) | %95,1 | 0,951 [0,945–0,956] | %99,3 | 85,8 M | 2,40 |
+| **ViT-B/16, 384 px (Adım 17)** | **%95,7** | **0,957** [0,952–0,962] | %99,4 | 86,1 M | 9,69 |
 
 | Tablo 2 · Nutrition5k (test) | MAE (kcal) | PMAE | R² | ±100 kcal içinde | Tablo 3 F1 | MAE balıksız / balıklı |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -114,10 +115,13 @@ Uçtan uca ince ayar, §6.1'deki ortak ayarlar (AdamW, omurga 1e-4 / başlık 1e
 | EfficientNet-B0, hatalı başlatma (ilk run) | 104,4 [97,0–112,4] | %40,9 | 0,58 | %57,6 | 0,600 | — |
 | EfficientNet-B0, düzeltilmiş başlatma | 52,8 [47,9–58,3] | %20,7 | 0,86 | %85,0 | 0,817 | 51,2 / 86,6 |
 | ViT-B/16 (Adım 13) | 47,3 [42,2–52,8] | %18,5 | 0,87 | %86,6 | 0,859 | 45,8 / 79,2 |
-| **ConvNeXt-T (Adım 13)** | **41,4** [37,3–46,4] | **%16,2** | **0,89** | **%89,0** | **0,861** | 39,8 / 75,1 |
+| ConvNeXt-T (Adım 13) | 41,4 [37,3–46,4] | %16,2 | 0,89 | %89,0 | 0,861 | 39,8 / 75,1 |
+| **ConvNeXt-T çok görevli: kalori + kütle + makrolar (Adım 17)** | **40,3** [36,2–45,3] | **%15,8** | **0,90** | %88,4 | 0,869 | 38,4 / 80,8 |
+| ConvNeXt-T, `log1p` hedef (Adım 17) | 43,3 [38,8–48,6] | %17,0 | 0,88 | **%89,9** | **0,871** | 41,5 / 81,2 |
+| ConvNeXt-T, veri artırmasız (Adım 17) | 46,2 [41,4–51,2] | %18,1 | 0,88 | %86,2 | 0,857 | 44,9 / 73,0 |
 | VLM sıfır-atış: Gemini 3.5 Flash-Lite (Adım 14) | 82,1 [73,8–90,0] | %32,1 | 0,65 | %74,0 | 0,751 | 81,6 / 93,0 |
 
-Balıklı tabak = malzeme listesinde `fish` geçen tabak; test kümesinde 23 tane (484 balıksız). Eski kalori sonuçları `results.csv`'de `*_timminit` adıyla duruyor.
+Balıklı tabak = malzeme listesinde `fish` geçen tabak; test kümesinde 23 tane (484 balıksız). Eski kalori sonuçları `results.csv`'de `*_timminit` adıyla duruyor. Adım 17 satırları aşağıdaki ablation bölümünde yorumlanıyor.
 
 **Adım 10–11 bulguları (ilk Kaggle run'ı):**
 
@@ -129,12 +133,31 @@ Balıklı tabak = malzeme listesinde `fish` geçen tabak; test kümesinde 23 tan
 **Adım 12–13 bulguları (ikinci Kaggle run'ı, 29 Ekim):**
 
 5. **Kaloride en iyi model ConvNeXt-T: 41,4 kcal, PMAE %16,2.** Fark ViT-B/16'ya göre −5,9 kcal [−8,9; −3,1], EfficientNet-B0'a göre −11,4 [−15,5; −7,7], klasik ML'nin en iyisi XGBoost'a göre −35,9 [−41,6; −30,6]; hepsi anlamlı. Her iki literatür hedefi (80,7 ve 70,6) artık bütün ince ayarlı modellerce geçildi; ConvNeXt-T, segmentasyon/derinlik kullanan çalışmaların 37–40 kcal aralığının hemen üstünde ve **yalnızca RGB** kullanıyor. Kardeş-sızıntısı endişesi Adım 16'da ölçüldü ve etkisi çıkmadı (§2), literatürle karşılaştırma bu açıdan güvenli.
-6. **Sınıflandırmada en iyi model ViT-B/16: F1 0,951.** ConvNeXt-T'den +0,009 [+0,004; +0,015], EfficientNet-B0'dan +0,034 [+0,028; +0,041]; ikisi de anlamlı ama küçük. ViT'nin parametresi EfficientNet-B0'ın 21 katı, çıkarımı 3,4 kat yavaş. Demo için EfficientNet-B0 veya ConvNeXt-T daha mantıklı; son seçim Adım 18'de.
+6. **Sınıflandırmada en iyi model ViT-B/16: F1 0,951.** ConvNeXt-T'den +0,009 [+0,004; +0,015], EfficientNet-B0'dan +0,034 [+0,028; +0,041]; ikisi de anlamlı ama küçük. ViT'nin parametresi EfficientNet-B0'ın 21 katı, çıkarımı 3,4 kat yavaş. Demo için EfficientNet-B0 veya ConvNeXt-T daha mantıklı. Adım 17'de 384 px ViT bunu 0,957'ye çıkardı (aşağıda).
 7. **ResNet-50 düzeltilmiş başlatmayla kötüleşti (59,7 → 68,7; +9,0 [+4,7; +13,8]) ve bunun sebebi başlatma değil, erken durdurma.** Yeni run 7. epoch'ta en iyi val'ini (63,6) gördü, 7 epoch iyileşme olmayınca 14. epoch'ta durdu; eski run 30 epoch'un tamamını koştu ve val'i 62,7'ydi. Val MAE'leri neredeyse aynı (63,6 ve 62,7) ama test 9 kcal farklı: **280 tabaklık val, model seçimi için gürültülü**, ve `--patience 7` cosine'ın ortasında kesebiliyor. Düzeltilmiş başlatmayla başlayan diğer üç kalori modeli (EfficientNet-B0, ConvNeXt-T, ViT) 24–29. epoch'ta en iyisini buldu ve sorun yaşamadı. Adım 17 için ders: kalori ablation'larında `--patience` ≥ 10 (veya sabit 30 epoch) ve mümkünse 2–3 tohumla tekrar.
-8. **Çok görevli başlık (Adım 12) en az tek görevli kadar iyi; "daha iyi" demek için kanıt yetersiz.** ResNet-50 çok görevli 58,0 kcal: aynı run'daki tek görevli ResNet-50'den (68,7) anlamlı iyi (−10,7 [−14,9; −7,0]), ama eski tek görevli run'dan (59,7) farkı anlamlı değil (−1,6 [−5,4; +2,4]). Tek görevli run erken durduğu için karşılaştırma kirli (madde 7). Yan çıktılar (test MAE): kütle 41,4 g, yağ 4,3 g, karbonhidrat 6,5 g, protein 6,2 g. Temiz cevap için Adım 17'de ConvNeXt-T'ye çok görevli başlık eklenip aynı ayarlarla tek görevliyle karşılaştırılmalı; §3'teki araştırma sorusu önerisi buna bağlı.
+8. **Çok görevli başlık (Adım 12) en az tek görevli kadar iyi; "daha iyi" demek için kanıt yetersiz.** ResNet-50 çok görevli 58,0 kcal: aynı run'daki tek görevli ResNet-50'den (68,7) anlamlı iyi (−10,7 [−14,9; −7,0]), ama eski tek görevli run'dan (59,7) farkı anlamlı değil (−1,6 [−5,4; +2,4]). Tek görevli run erken durduğu için karşılaştırma kirli (madde 7). Yan çıktılar (test MAE): kütle 41,4 g, yağ 4,3 g, karbonhidrat 6,5 g, protein 6,2 g. Temiz tekrar Adım 17'de ConvNeXt-T ile yapıldı: fark yine anlamlı değil (aşağıda, ablation madde 1).
 9. **Balıklı tabaklar bütün modellerde 1,7–1,9 kat daha kötü** (ConvNeXt-T: balıksız 39,8, balıklı 75,1 kcal). EDA'daki bulguyla tutarlı: balık kalorisi veri setinde eksik kayıtlı, yani hata kısmen etiketten geliyor. Raporda Tablo 2'nin yanında ayrı sütun olarak verilmeli; Adım 16 hata analizinde "en kötü 20 tabak" listesinde balıklılar işaretlenmeli.
 10. **Val–test ilişkisi beklendiği gibi.** Kaloride test, val'den iyi (ConvNeXt-T 46,0 → 41,4), kardeş-sızıntısı tahminiyle uyumlu; sınıflandırmada da test > val (ViT 0,930 → 0,951), madde 3'teki sebeple.
 11. **Süre (T4, bir epoch):** kalori modelleri 27–30 sn (2472 görüntü); sınıflandırma EfficientNet-B0 52 sn, ResNet-50 73 sn, ConvNeXt-T 83 sn, ViT-B/16 145 sn (16 865 görüntü). Notebook 11 toplam ~2,5 saat sürdü (eğitim ~2,2 sa + değerlendirme).
+
+### Ablation bulguları (Adım 17, `notebooks/12_ablation_kaggle_adim17.ipynb`, Kaggle T4, 31 Ekim – 1 Kasım)
+
+Adım 13'teki ConvNeXt-T ayarları sabit tutuldu (AdamW, 1e-4 / 1e-3, 30 epoch, L1, 224 px, tohum 42); her satırda **tek bir şey** değişti. Erken durdurma `--patience 10` ile yapıldı ve hiçbir run erken durmadı (en iyi epoch 22–25/30), yani Adım 12–13'teki ResNet-50 sorunu (madde 7) tekrarlanmadı. Tablo `python -m src.make_figures` ile `results/tablo_ablation.md`'ye de yazılır; Δ sütunu nokta tahmindir, güven aralıkları metinde (`src.compare`, eşleştirilmiş bootstrap).
+
+| Ablation (ConvNeXt-T, Nutrition5k test) | MAE (kcal) [%95 GA] | Δ MAE | PMAE | R² | ±100 kcal içinde | Tablo 3 F1 | Yan çıktılar (test MAE) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| ConvNeXt-T, yalnızca kalori (Adım 13, referans) | 41,4 [37,3–46,4] | — | %16,2 | 0,89 | %89,0 | 0,861 | — |
+| + çok görevli başlık (kalori + kütle + yağ + karbonhidrat + protein) | **40,3** [36,2–45,3] | −1,1 | **%15,8** | **0,90** | %88,4 | 0,869 | kütle 25,5 g · yağ 3,1 g · karb 4,6 g · protein 4,2 g |
+| `log1p` hedef (yalnızca kalori) | 43,3 [38,8–48,6] | +1,9 | %17,0 | 0,88 | **%89,9** | **0,871** | — |
+| veri artırması yok (yalnızca kalori) | 46,2 [41,4–51,2] | +4,7 | %18,1 | 0,88 | %86,2 | 0,857 | — |
+| Sınıflandırma: ViT-B/16 224 px → **384 px** (Food-101, Tablo 1) | F1 0,951 → **0,957** [0,952–0,962] | +0,007 | — | — | — | — | 2,40 → 9,69 ms/görüntü; 145 → 588 sn/epoch |
+
+1. **Çok görevli başlık kaloriyi anlamlı iyileştirmiyor, ama bedavaya kütle ve makro veriyor.** 40,3'e karşı 41,4: fark −1,1 kcal [−2,8; +0,6], anlamlı değil. Bu, araştırma sorusunun (§3 Açık konular) temiz cevabı: *"kütle ve makroları birlikte öğrenmek yalnızca kalori öğrenmekten daha iyi değil, ama daha kötü de değil; aynı maliyetle dört ek çıktı veriyor."* Yan çıktılar ResNet-50 çok görevliden (madde 8) belirgin iyi: kütle 41,4 → 25,5 g, yağ 4,3 → 3,1 g, karbonhidrat 6,5 → 4,6 g, protein 6,2 → 4,2 g. Her iki model de 25. epoch'ta en iyi val'ini buldu; epoch süresi aynı (27–29 sn). **Adım 18 önerisi:** demo ve final satırı için çok görevli ConvNeXt-T (kalori eşit, çıktı daha zengin).
+2. **`log1p` hedef kaloriyi iyileştirmiyor; EDA'daki "ham kcal + L1" kararı doğruydu.** 43,3'e karşı 41,4: +1,9 [−0,2; +4,2], sınırda ama anlamlı değil; çok görevliye göre ise anlamlı kötü (+3,0 [+0,8; +5,5]). Beklenen etkisi görülüyor: hata küçük tabaklara kayıyor, MAPE düşüyor (%28,6 → %24,9), Tablo 3 F1 ve ±100 kcal oranı biraz artıyor, ama büyük tabaklarda (toplam MAE'yi belirleyen yer, bkz. Adım 15 madde 2) hata büyüyor. Rapor için: hedef metriği MAE ise `log1p` kullanılmaz; MAPE/aralık doğruluğu önemliyse düşünülebilir.
+3. **Veri artırması yaklaşık 5 kcal (%11) değerinde ve anlamlı.** Artırmasız 46,2'ye karşı 41,4: +4,7 [+2,5; +7,1]. Artırmasız run'ın train kaybı en düşük (0,007'ye karşı 0,043) ama val'i en kötü (48,8'e karşı 46,0): klasik aşırı öğrenme. §6.1'deki ölçek korumalı `calorie_transform` (çevirme, döndürme, renk; kırpma/yeniden boyutlama yok) tek başına bu farkı sağlıyor. Epoch %30 daha hızlı (19 sn), o kadar.
+4. **384 px ViT sınıflandırmada en iyi: F1 0,957.** 224 px ViT'ye göre +0,007 [+0,002; +0,011], ConvNeXt-T'ye göre +0,016 [+0,010; +0,022]; ikisi de anlamlı ama küçük. Bedeli büyük: çıkarım 4 kat yavaş (9,69 ms), eğitim 4 kat uzun (20 epoch 3,3 sa, notebook 12'nin süresinin %80'i). Tablo 1'in en iyi satırı bu, ama demo/ürün için ConvNeXt-T (0,941, 1,49 ms) daha mantıklı bir denge; raporda "çözünürlük kazancı küçük ve pahalı" bulgusu olarak verilmeli.
+5. **Denenmeyenler ve neden:** tahmini derinlik kanalı (Depth Anything V2) ve ensemble/TTA planlanmıştı (§7 Faz 5), süre yüzünden ablation'a girmedi. Hata analizi (Adım 15) en büyük hataların "yeşilliğin altına gizlenmiş protein" tabaklarında olduğunu gösterdi; bu, RGB'den çözülemeyen bir porsiyon/örtüşme sorunu ve derinlik kanalının en çok işe yarayacağı yer. Raporun "gelecek çalışma" bölümüne.
+6. **Tekrarlanabilirlik notu:** tüm karşılaştırmalar tek tohumla (42). Çok görevli ve `log1p` farkları güven aralığının sınırında; 2–3 tohumla tekrar olmadan "eğilim" diye yazılmalı, "iyileşme/kötüleşme" diye değil. Augmentasyon ve 384 px farkları tek tohumda bile aralığın dışında.
 
 ### VLM sıfır-atış referansı (Adım 14, `python -m src.vlm_eval`)
 
@@ -146,7 +169,7 @@ Gemini 3.5 Flash-Lite, 512 px JPEG, sıcaklık 0, sabit prompt (kalemler + gram 
 
 ### Değerlendirme bulguları (Adım 15, `python -m src.make_figures` + `python -m src.gradcam`)
 
-Bütün figürler `results/preds/` ve `results/history/` dosyalarından üretilir; GPU ve checkpoint gerekmez (yalnızca Grad-CAM için `checkpoints/convnext_tiny_reg.pt`). Rapora yapıştırmaya hazır tablolar: `results/tablo1.md`, `tablo2.md` (precision/recall ve RMSE dahil), `tablo3_kalori_araligi.md`.
+Bütün figürler `results/preds/` ve `results/history/` dosyalarından üretilir; GPU ve checkpoint gerekmez (yalnızca Grad-CAM için `checkpoints/convnext_tiny_reg.pt`). Rapora yapıştırmaya hazır tablolar: `results/tablo1.md`, `tablo2.md` (precision/recall ve RMSE dahil), `tablo3_kalori_araligi.md`, `tablo_ablation.md` (Adım 17).
 
 | Tablo 3 · Kalori aralığı (düşük < 116,1 ≤ orta < 313,7 ≤ yüksek kcal, test) | Doğruluk | Precision (macro) | Recall (macro) | Macro-F1 [%95 GA] |
 | --- | --- | --- | --- | --- |
@@ -189,6 +212,7 @@ EDA'daki endişe: resmi test tabaklarının %22'sinin train'de "kardeşi" var (1
 | EfficientNet-B0 | 50,8 | 53,4 | 0,95 |
 | ViT-B/16 | 45,6 | 47,8 | 0,95 |
 | ConvNeXt-T | 45,0 [32,6–59,1] | 40,4 [35,7–45,7] | 1,11 |
+| ConvNeXt-T çok görevli (Adım 17) | 42,0 [31,2–54,9] | 39,8 [35,1–45,2] | 1,05 |
 
 **Sonuç: kardeşli tabaklar daha kolay değil.** Oranlar 0,95–1,14 arasında ve bütün güven aralıkları üst üste; en iyi modelde kardeşli tabaklar hatta biraz daha zor (yüksek kalorili dizilerin sonları). Yani test MAE'miz kardeş-sızıntısı yüzünden iyimser değil; "val testten kötü çıkacak" beklentisinin asıl sebebi val'in zaman gruplu ve küçük (280) olması. Raporun sınırlılıklar bölümünde bu ölçüm verilir, çekince kaldırılır. Not: yalnızca zaman komşuluğuna bakılırsa test tabaklarının %82'sinin 10 dk içinde train komşusu var (kafeterya aralıksız çekmiş); anlamlı tanım malzeme iç içeliğidir.
 
@@ -200,7 +224,7 @@ EDA'daki endişe: resmi test tabaklarının %22'sinin train'de "kardeşi" var (1
 | ResNet-50, ImageNet ön eğitimli (Andrade 2025) | 117,4 | 46,6 | İlk derin model bu civarda çıkabilir |
 | En iyi sıfır-atış VLM (Gemini 3.0 Flash) | 80,7 | — | **1. hedef** ✅ geçildi (tüm ince ayarlı modeller). Kendi ölçümümüz (Gemini 3.5 Flash-Lite): 82,1 |
 | Orijinal Nutrition5k RGB baseline'ı (JFT ön eğitimli) | 70,6 | 26,1 | **2. hedef** ✅ geçildi |
-| Segmentasyon veya tahmini derinlikle güncel çalışmalar | 37–40 | 14,7–15,7 | İyileştirme fazında yaklaşılacak üst sınır. **ConvNeXt-T yalnızca RGB ile 41,4 / %16,2** (kardeş-sızıntısı ölçüldü, etkisi yok) |
+| Segmentasyon veya tahmini derinlikle güncel çalışmalar | 37–40 | 14,7–15,7 | İyileştirme fazında yaklaşılacak üst sınır. **ConvNeXt-T yalnızca RGB ile 41,4 / %16,2; çok görevli 40,3 / %15,8** (kardeş-sızıntısı ölçüldü, etkisi yok) |
 
 ---
 
@@ -216,17 +240,18 @@ EDA'daki endişe: resmi test tabaklarının %22'sinin train'de "kardeşi" var (1
 | 3 | Baseline modeller | ✅ Naif (Adım 8, `src/baselines.py`) · Klasik ML (Adım 9, `src/classic_ml.py`) · **Kontrol noktası 1 ✅** |
 | 3 | CNN / Transformer eğitimi | ✅ Adım 10–13 (`notebooks/10_egitim_kaggle.ipynb`, `11_egitim_kaggle_adim12-13.ipynb`; bulgular ve Tablo 1–2 §2'de) |
 | 4 | Değerlendirme + VLM referansı | Adım 15 ✅ (figürler, Tablo 1–3) · Adım 14 ✅ (Gemini 3.5 Flash-Lite 82,1 kcal, 507 tabak) |
-| 5 | İyileştirme ve ablation | Adım 16 ✅ (hata analizi §2; kardeş-sızıntısı ölçüldü, etkisi yok) · Adım 17 ⏳ `notebooks/12_ablation_kaggle_adim17.ipynb` Kaggle'da çalıştırılacak |
+| 5–6 | Final model (Adım 18) | ⏳ Öneri §2 ablation madde 1 ve §4: kalori için çok görevli ConvNeXt-T (40,3), sınıflandırma için ViT-B/16 384 px (0,957); ekip onayı bekliyor |
+| 5 | İyileştirme ve ablation | Adım 16 ✅ (hata analizi §2; kardeş-sızıntısı ölçüldü, etkisi yok) · Adım 17 ✅ (`notebooks/12_ablation_kaggle_adim17.ipynb`; ablation tablosu ve bulguları §2'de) |
 | — | Tablolar, figürler, kodun temizlenmesi | Tablolar + figürler ✅ (`src/make_figures.py` ile yeniden üretilir) · kod temizliği ⬜ |
 | 6–7 | Rapor ve sunum | ⬜ Geliştirmeden sonra |
 
-**Kısaca:** Adım 1–16 bitti. En iyiler: sınıflandırmada **ViT-B/16, F1 0,951**; kaloride **ConvNeXt-T, test MAE 41,4 kcal (PMAE %16,2)**. VLM referansı (Gemini 3.5 Flash-Lite) **82,1 kcal**: literatürdeki 80,7 ile tutarlı, ConvNeXt-T'den anlamlı kötü, klasik ML ile başa baş. Hata analizi: en büyük hatalar yeşilliğin altına gizlenmiş proteinli yüksek kalorili tabaklarda (Grad-CAM doğruluyor); kardeş-sızıntısı test MAE'sini iyimser yapmıyor (ölçüldü, §2). Sıradaki: **Adım 17**, `notebooks/12_ablation_kaggle_adim17.ipynb` Kaggle'da (4 ablation, ~3,5 sa).
+**Kısaca:** Adım 1–17 bitti. En iyiler: sınıflandırmada **ViT-B/16 384 px, F1 0,957**; kaloride **ConvNeXt-T çok görevli, test MAE 40,3 kcal (PMAE %15,8)**, tek görevli ConvNeXt-T'den (41,4) anlamlı farklı değil. Ablation: veri artırması anlamlı (+4,7 kcal onsuz), `log1p` ve çok görevli başlık anlamsız fark, 384 px küçük ama anlamlı F1 kazancı ve 4 kat maliyet. VLM referansı (Gemini 3.5 Flash-Lite) **82,1 kcal**: literatürdeki 80,7 ile tutarlı, ConvNeXt-T'den anlamlı kötü, klasik ML ile başa baş. Hata analizi: en büyük hatalar yeşilliğin altına gizlenmiş proteinli yüksek kalorili tabaklarda (Grad-CAM doğruluyor); kardeş-sızıntısı test MAE'sini iyimser yapmıyor (ölçüldü, §2). Sıradaki: **Adım 18** (final model kararı, §4), **Adım 19** (kendi fotoğraflarımız; demo hazır), **Adım 20** (toparlama).
 
 ### Açık konular (karar bekliyor)
 
 | Konu | Durum |
 | --- | --- |
-| **Araştırma sorusu deneylerle uyuşmuyor** | §1'deki soru "yemek türü + kalori birlikte" diyor, ancak tür etiketi Food-101'de, kalori Nutrition5k'da; hiçbir fotoğrafta ikisi birden yok, bu yüzden soru hiçbir deneyde test edilmiyor. Öneri: soruyu Adım 12'ye uydurmak → "Kaloriyle birlikte kütle ve makroları da tahmin etmek, yalnızca kalori tahmininden daha mı iyi?" Food-101 sınıflandırması Tablo 1 için ayrı deney olarak kalır. **Adım 12 sonucu:** ResNet-50'de fark anlamlı değil (§2 madde 8); soru bu haliyle seçilirse Adım 17'de ConvNeXt-T üzerinde temiz bir tekrar şart. |
+| **Araştırma sorusu deneylerle uyuşmuyor** | §1'deki soru "yemek türü + kalori birlikte" diyor, ancak tür etiketi Food-101'de, kalori Nutrition5k'da; hiçbir fotoğrafta ikisi birden yok, bu yüzden soru hiçbir deneyde test edilmiyor. Öneri: soruyu Adım 12'ye uydurmak → "Kaloriyle birlikte kütle ve makroları da tahmin etmek, yalnızca kalori tahmininden daha mı iyi?" Food-101 sınıflandırması Tablo 1 için ayrı deney olarak kalır. **Adım 12 sonucu:** ResNet-50'de fark anlamlı değil (§2 madde 8). **Adım 17 sonucu:** ConvNeXt-T'de temiz tekrar, yine anlamlı değil (−1,1 [−2,8; +0,6]) ama kütle/makro çıktıları bedavaya geliyor (§2 ablation madde 1). Cevap hazır: "daha iyi değil, aynı maliyetle daha zengin". Soru bu şekilde yazılırsa rapor tutarlı. |
 | Teslim tarihi | Belgede yok. Gün 1'in tarihini ve teslim gününü §4'e yazın |
 | İş bölümü | Adım 5'ten sonra iki bağımsız hat var: **kalori** (Nutrition5k EDA → kalori modelleri → iyileştirme) ve **sınıflandırma** (Food-101 → klasik ML → CNN/ViT → VLM betiği). İki kişi paralel çalışırsa süre ve GPU kotası ikiye katlanır |
 | VLM seçimi ve bütçe | ✅ Gemini 3.5 Flash-Lite, ücretsiz katman (günde 500 istek), anahtar traldo'da. Flash modelleri ücretsiz katmanda günde 20 istek → literatürdeki Gemini 3 Flash ile birebir karşılaştırma istenirse faturalandırma (~2–3 $) ya da ikinci sağlayıcı (`--provider openai` hazır). Karar arkadaşa |
@@ -262,11 +287,12 @@ Adımlar sırayla yapılır; her adımın bir çıktısı ve bir "bitti" kriteri
 | 19 | 9 | Demo: fotoğraf yükle → kcal (`app.py` iskeleti hazır) + kendi fotoğraflarımızla test (§7 Faz 4) | Çalışan demo, kısa bir video kaydı, `own_photos` satırları |
 | 20 | 9 | Toparlama: figürlerin son hali, kod temizliği, README | `main` dalında baştan sona çalışan kod. **Kontrol noktası 3** |
 
-**Durum (1 Kasım):** Adım 1–16 ✅ · Adım 17 ⏳ (Kaggle) · Adım 19 demo tarafı ✅ (fotoğraflar bekleniyor) · Kontrol noktası 1 ✅ · Kontrol noktası 2 ✅
+**Durum (1 Kasım):** Adım 1–17 ✅ · Adım 18 ⏳ (karar) · Adım 19 demo tarafı ✅ (fotoğraflar bekleniyor) · Kontrol noktası 1 ✅ · Kontrol noktası 2 ✅
 
 **Sıradaki adım:**
-1. **Adım 17**: `notebooks/12_ablation_kaggle_adim17.ipynb` → Kaggle'a Import → GPU T4 x2 + Internet + Secrets `GH_TOKEN` → Save & Run All (Commit), ~3,5 sa. Dört ablation: ConvNeXt-T çok görevli, `log1p` hedef, augmentasyonsuz, ViT-B/16 384 px. Sonuçlar kendiliğinden `results.csv`'ye gider; sonra `python -m src.make_figures` ile tablolar yenilenir ve ablation tablosu §2'ye yazılır.
-2. **Adım 19 fotoğrafları** eğitimden bağımsız: 15–20 tabak fotoğrafı + tartı (§7 Faz 4). Demo ve dış-test betiği hazır ve ConvNeXt-T checkpoint'iyle doğrulandı (1 Kasım): `python app.py` demoyu açar (varsayılan checkpoint `checkpoints/convnext_tiny_reg.pt`, Mac CPU'da tabak başına ~0,2 s); fotoğraflar `own_photos/` + `labels.csv`'ye konunca `python -m src.eval_own_photos --ckpt checkpoints/convnext_tiny_reg.pt --model convnext_tiny_reg` sonucu `results.csv`'ye yazar. Adım 18'de final model değişirse aynı komutlar o checkpoint'le tekrarlanır.
+1. **Adım 18 — final model kararı (ekip):** öneri, kalori için **ConvNeXt-T çok görevli** (`convnext_tiny_reg_mt`, 40,3 kcal; tek görevliyle fark anlamsız, ama kütle + makro çıktıları var → demoda gösterilir), sınıflandırma için Tablo 1'de **ViT-B/16 384 px** (0,957), demo/hız tartışmasında ConvNeXt-T (0,941, 6,5 kat hızlı). Test ölçümleri zaten `results.csv`'de; karar verilince §2 Hedeflerimiz tablosuna "Bu çalışma" satırı ve §1'e final sayılar yazılır. Checkpoint `convnext_tiny_reg_mt.pt` Release'te (111 MB, Mac'e indirilmedi): `GH_TOKEN=$(gh auth token) python scripts/share_checkpoint.py download convnext_tiny_reg_mt`, sonra `python app.py --ckpt checkpoints/convnext_tiny_reg_mt.pt`.
+2. **Adım 19 fotoğrafları** eğitimden bağımsız: 15–20 tabak fotoğrafı + tartı (§7 Faz 4). Demo ve dış-test betiği hazır ve ConvNeXt-T checkpoint'iyle doğrulandı (1 Kasım): `python app.py` demoyu açar (varsayılan checkpoint `checkpoints/convnext_tiny_reg.pt`, Mac CPU'da tabak başına ~0,2 s); fotoğraflar `own_photos/` + `labels.csv`'ye konunca `python -m src.eval_own_photos --ckpt checkpoints/<final>.pt --model <final>` sonucu `results.csv`'ye yazar.
+3. **Adım 20 — toparlama:** kod temizliği, figürlerin son hali, README'nin rapor için sadeleştirilmesi (kontrol noktası 3).
 
 ---
 
@@ -349,7 +375,7 @@ kalori-tahmini/
 │   ├── history/           ← eğitim eğrileri: epoch başına kayıp ve val skoru (git'te)
 │   ├── data_card_nutrition5k.csv, data_card_food101.csv ← veri kartları (EDA)
 │   ├── vlm/               ← VLM ham yanıtları (jsonl, devam edilebilir; git'te)
-│   ├── tablo1.md, tablo2.md, tablo3_kalori_araligi.md ← rapora hazır tablolar
+│   ├── tablo1.md, tablo2.md, tablo3_kalori_araligi.md, tablo_ablation.md ← rapora hazır tablolar
 │   ├── eval_*.csv         ← karışan çiftler, en kötü 20, aralık MAE
 │   └── figures/           ← n5k_*, f101_* (EDA), eval_* (Adım 15)
 └── checkpoints/           ← git'e EKLENMEZ
@@ -561,16 +587,17 @@ Raporda: Nutrition5k test MAE'si ile kendi fotoğraflarımızdaki MAE yan yana; 
 | Makrolar ile kalori tutarsız | Atwater tutarlılık kaybı |
 | Son birkaç puan | TTA, farklı omurgaların ensemble'ı |
 
-**Ablation tablosu** (`task=ablation`):
+**Ablation tablosu** — dolduruldu, Adım 17 (ayrıntı ve güven aralıkları §2 "Ablation bulguları"):
 
-| Deney | MAE | PMAE | F1 (sınıf) |
+| Deney (ConvNeXt-T, Nutrition5k test) | MAE (kcal) | PMAE | Tablo 3 F1 |
 | --- | --- | --- | --- |
-| Baseline (ResNet-50, augmentation yok) | | | |
-| + veri artırma (kalori: yalnızca `calorie_transform`, §6.1) | | | |
-| + çok görevli başlık (kütle) | | | |
-| + `log1p` hedef + Huber | | | |
-| + tahmini derinlik kanalı | | | |
-| + ensemble / TTA | | | |
+| ConvNeXt-T, veri artırması yok | 46,2 | %18,1 | 0,857 |
+| + veri artırma (kalori: yalnızca `calorie_transform`, §6.1) = Adım 13 referansı | 41,4 | %16,2 | 0,861 |
+| + çok görevli başlık (kütle + makrolar) | **40,3** | **%15,8** | 0,869 |
+| `log1p` hedef (artırmalı, tek görevli) | 43,3 | %17,0 | 0,871 |
+| + tahmini derinlik kanalı | denenmedi (süre) | | |
+| + ensemble / TTA | denenmedi (süre) | | |
+| Sınıflandırma: ViT-B/16 224 → 384 px (Food-101 F1) | 0,951 → **0,957** | | |
 
 **Zaman sıkışırsa:** yalnızca veri artırma ve kütle başlıklı çok görevli öğrenmeyi deneyin. En büyük kazancı bu ikisi getirir.
 
@@ -582,7 +609,7 @@ Raporda: Nutrition5k test MAE'si ile kendi fotoğraflarımızdaki MAE yan yana; 
 | --- | --- | --- |
 | Gün 1 sonu (Adım 5) | Veri indirildi, `metrics.py` hazır | Food-101 alt kümesini 10 sınıfa indirin |
 | **Gün 3 sonu (Adım 9, kontrol noktası 1)** ✅ | Baseline sonuçları Tablo 1 ve 2'de | İyileştirme fazı 2 tekniğe iner (yukarıda) |
-| Gün 6 sonu (Adım 15, kontrol noktası 2) | En iyi model 80,7 kcal'in (VLM) altında | Çok görevli başlık ve `log1p` hedefe öncelik verin |
+| Gün 6 sonu (Adım 15, kontrol noktası 2) ✅ | En iyi model 80,7 kcal'in (VLM) altında | Çok görevli başlık ve `log1p` hedefe öncelik verin |
 | Gün 9 (Adım 20, kontrol noktası 3) | Tüm tablolar dolu, kod `main`'de çalışıyor | — |
 
 | Risk | Önlem |
@@ -616,6 +643,7 @@ Bu dosyanın kapsamı dışında; bilgi için:
 
 | Tarih | Kim | Son tamamlanan adım | Yarım kalan iş / sıradaki adım | Notlar (değişen ayarlar, sorunlar) |
 | --- | --- | --- | --- | --- |
+| 2026-11-01 | traldo | Adım 17 ✅ (Kaggle notebook 12, ~4 sa; sonuçlar §2 "Ablation bulguları") | Adım 18: final model kararı (öneri: ConvNeXt-T çok görevli + ViT-B/16 384 px) · Adım 19 fotoğrafları · Adım 20 | Çok görevli ConvNeXt-T 40,3 (tek görevliden farkı anlamsız, kütle 25,5 g / makrolar 3–5 g), `log1p` 43,3 (anlamsız, MAPE iyileşir), artırmasız 46,2 (anlamlı kötü), ViT-384 F1 0,957 (anlamlı ama 4 kat yavaş). `--patience 10` ile hiçbir run erken durmadı. `src.make_figures` artık `results/tablo_ablation.md` de yazar; `src.leakage` çok görevli modeli de ölçer (oran 1,05). `convnext_tiny_reg_mt.pt` Release'te, Mac'e indirilmedi |
 | 2026-11-01 | traldo | Adım 19 demo tarafı ✅ (Kaggle sonucu beklenirken) | Adım 17: Kaggle'da notebook 12 → sonuçlar; Adım 19: 15–20 tabak fotoğrafı çek | `app.py` (Gradio 6.31) ve `src.eval_own_photos` gerçek ConvNeXt-T checkpoint'iyle uçtan uca denendi: demo tahminleri `results/preds/convnext_tiny_reg.csv` ile birebir, arayüz açılıyor, `own_photos` / `_ust` / `_yan` satırları yazılıyor (deneme 5 Nutrition5k görüntüsüyle yapıldı, `results.csv`'ye yazılmadı). `app.py --ckpt` artık varsayılan olarak `checkpoints/convnext_tiny_reg.pt` |
 | 2026-10-30 | traldo | Adım 16 ✅ (kardeş-sızıntısı ölçümü: etkisi yok) + Adım 17 hazırlığı (notebook 12) | `notebooks/12_ablation_kaggle_adim17.ipynb`'yi Kaggle'da çalıştır (~3,5 sa) | `src/leakage.py` EDA'daki tanımı kullanır (zaman komşusu + iç içe malzeme). Notebook 12: ConvNeXt-T çok görevli / log1p / augmentasyonsuz (`--patience 10`), ViT-B/16 384 px (`--batch-size 16`). ViT-384 ağırlıkları Mac'e indirilmedi, Kaggle'da ilk kez çalışacak |
 | 2026-10-30 | traldo | Adım 15 ✅ (figürler, Tablo 1–3, Grad-CAM) + Adım 14 ✅ (Gemini 3.5 Flash-Lite 82,1 kcal, 507 tabak, iki günde) | Adım 16–17 ablation'ları | `src/make_figures.py` (9 figür + 3 md tablo), `src/gradcam.py`, `src/vlm_eval.py` (stdlib, devam edilebilir). Bulgular §2 "Değerlendirme bulguları": en büyük hatalar yeşillik altındaki proteinli yüksek kalorili tabaklar; apple pie en zayıf sınıf. `checkpoints/convnext_tiny_reg.pt` Mac'e indirildi (git dışı) |

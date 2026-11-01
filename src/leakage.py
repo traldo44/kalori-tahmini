@@ -20,10 +20,11 @@ from .data import dish_time, load_n5k_split, read_dish_ingredients
 from .metrics import bootstrap_ci, mae
 
 MODELS = ["naive_mean", "vlm_gemini_3_5_flash_lite", "cnn_xgb", "resnet50_reg_timminit", "resnet50_reg_mt",
-          "efficientnet_b0_reg", "vit_b16_reg", "convnext_tiny_reg"]
+          "efficientnet_b0_reg", "vit_b16_reg", "convnext_tiny_reg", "convnext_tiny_reg_mt"]
 LABELS = {"naive_mean": "Naif", "vlm_gemini_3_5_flash_lite": "VLM (Flash-Lite)", "cnn_xgb": "ResNet-50 + XGBoost",
           "resnet50_reg_timminit": "ResNet-50", "resnet50_reg_mt": "ResNet-50 çok görevli",
-          "efficientnet_b0_reg": "EfficientNet-B0", "vit_b16_reg": "ViT-B/16", "convnext_tiny_reg": "ConvNeXt-T"}
+          "efficientnet_b0_reg": "EfficientNet-B0", "vit_b16_reg": "ViT-B/16", "convnext_tiny_reg": "ConvNeXt-T",
+          "convnext_tiny_reg_mt": "ConvNeXt-T çok görevli"}
 
 
 def has_train_sibling(test_ids, train_ids, ingredients, gap=VAL_GROUP_GAP_SEC):
