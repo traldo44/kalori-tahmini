@@ -7,3 +7,4 @@ resnet50_reg_mt,ResNet-50 çok görevli,56.04,42.16,71.47,111,58.57,52.72,64.81,
 efficientnet_b0_reg,EfficientNet-B0,50.78,38.64,64.03,111,53.41,47.62,59.76,396,0.95
 vit_b16_reg,ViT-B/16,45.55,33.6,59.38,111,47.81,42.65,53.51,396,0.95
 convnext_tiny_reg,ConvNeXt-T,44.99,32.64,59.08,111,40.45,35.73,45.72,396,1.11
+convnext_tiny_reg_mt,ConvNeXt-T çok görevli,41.97,31.2,54.95,111,39.83,35.05,45.2,396,1.05

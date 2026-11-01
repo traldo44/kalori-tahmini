@@ -23,3 +23,6 @@ vit_b16_reg,ViT-B/16,yüksek,172,89.24727435444676
 convnext_tiny_reg,ConvNeXt-T,düşük,176,16.239681439643558
 convnext_tiny_reg,ConvNeXt-T,orta,159,31.578522736171507
 convnext_tiny_reg,ConvNeXt-T,yüksek,172,76.35269701758097
+convnext_tiny_reg_mt,ConvNeXt-T çok görevli,düşük,176,16.146383005787026
+convnext_tiny_reg_mt,ConvNeXt-T çok görevli,orta,159,31.258576375133586
+convnext_tiny_reg_mt,ConvNeXt-T çok görevli,yüksek,172,73.3795731566673
