@@ -8,7 +8,6 @@ fazla 3 seri (renk körü okuyucular için yalnızca ilk 3 renk birbirinden ayı
 tek seride lejant yok; çift y-ekseni yok; metinler seri renginde değil, mürekkep renginde.
 """
 import matplotlib as mpl
-import matplotlib.pyplot as plt
 
 from .config import RESULTS_DIR
 
