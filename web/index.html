@@ -15,18 +15,14 @@
 <main>
   <header>
     <h1>Kalori tahmini</h1>
-    <p>Tabağın üstten fotoğrafından kalori, porsiyon ve makro tahmini. Model telefonunuzda çalışır; fotoğraf hiçbir yere gönderilmez.</p>
+    <p>Tabağın üstten fotoğrafından kalori, porsiyon ve makro tahmini. Model telefonunuzda çalışır; fotoğraf hiçbir yere gönderilmez. İlk açılışta 28 MB'lık model bir kez iner.</p>
   </header>
 
   <section class="giris" aria-label="Fotoğraf seç">
-    <label class="buton birincil">
-      <input type="file" accept="image/*" capture="environment" id="kamera">
-      Fotoğraf çek
-    </label>
-    <label class="buton">
-      <input type="file" accept="image/*" id="galeri">
-      Galeriden seç
-    </label>
+    <button type="button" class="buton birincil" id="kamera-dugme">Fotoğraf çek</button>
+    <button type="button" class="buton" id="galeri-dugme">Galeriden seç</button>
+    <input type="file" accept="image/*" capture="environment" id="kamera" class="gizli" tabindex="-1" aria-hidden="true">
+    <input type="file" accept="image/*" id="galeri" class="gizli" tabindex="-1" aria-hidden="true">
   </section>
 
   <p id="durum" class="durum" aria-live="polite">Model hazırlanıyor…</p>
@@ -82,7 +78,6 @@
   </footer>
 </main>
 
-<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.31.1/dist/ort.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
