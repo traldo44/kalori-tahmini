@@ -49,7 +49,8 @@ h2 { font-size: .9rem; font-weight: 600; color: var(--soluk); margin: 0 0 8px; t
 .buton:active { filter: brightness(.95); }
 .buton.birincil { background: var(--vurgu); border-color: var(--vurgu); color: #fff; }
 .buton.birincil:active { background: var(--vurgu-koyu); }
-.buton input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.gizli { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.buton { font: inherit; font-weight: 500; }
 
 .durum { margin: 10px 0 0; font-size: .88rem; color: var(--soluk); min-height: 1.3em; }
 .durum.hata { color: #b23b3b; }
