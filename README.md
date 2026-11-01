@@ -583,7 +583,7 @@ Raporda: Nutrition5k test MAE'si ile kendi fotoğraflarımızdaki MAE yan yana; 
 
 #### Web demosu (telefondan çek / yükle → kcal)
 
-`app.py` Gradio arayüzü telefon için düzenlendi: kamera (arka kamera) veya galeri, büyük kcal sonucu, altında kütle ve makrolar, açılır bölümlerde "modelin gördüğü" kırpma, çekim talimatı ve model/sonuç özeti; `demo_ornekleri/`'ndeki 4 test tabağı tek dokunuşla denenir (gerçek kalorileri açılır tabloda). Üç çalıştırma yolu:
+`app.py` Gradio arayüzü telefon için düzenlendi (sade tema, tek sütun ≤ 560 px, açık/koyu): kamera (arka kamera) veya galeri; sonuç kartında kcal, ±40 kcal aralığı, günlük 2000 kcal'e oranı, düşük/orta/yüksek etiketi (Tablo 3 sınırları), porsiyon ve makrolar (enerji payı çubuklarıyla); açılır bölümlerde "modelin gördüğü" kırpma, sınırlılıklar ve model/sonuç özeti. 390 px telefon görünümü headless Chrome ile doğrulandı (Chrome pencereyi 500 px altına indirmez, iframe ile ölçüldü); `demo_ornekleri/`'ndeki 4 test tabağı tek dokunuşla denenir (gerçek kalorileri açılır tabloda). Üç çalıştırma yolu:
 
 | Yol | Komut | Ne zaman |
 | --- | --- | --- |
