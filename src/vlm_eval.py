@@ -34,7 +34,7 @@ from PIL import Image
 
 from .config import CALORIE_BIN_EDGES, N5K_DIR, RESULTS_DIR, SEED
 from .data import load_n5k_split, make_val_split, read_dish_metadata
-from .metrics import classification_metrics, regression_metrics, to_bins
+from .metrics import classification_metrics, regression_metrics, bin_scores, to_bins
 from .results import log_result, save_preds
 
 # Prompt İngilizce: VLM'ler İngilizce talimatla daha kararlı JSON üretiyor. Değiştirirseniz run adını da değiştirin.
@@ -267,7 +267,7 @@ def summarize(records, ids, meta, train_mean):
            "ids_ok": [d for d, k in zip(ids, ok) if k], "y_ok": y_all[ok], "pred_ok": pred[ok]}
     if ok.sum() >= 2:
         out["metrics"] = regression_metrics(y_all[ok], pred[ok], ci=True)
-        out["bins"] = classification_metrics(to_bins(y_all[ok], CALORIE_BIN_EDGES), to_bins(pred[ok], CALORIE_BIN_EDGES), ci=True)
+        out["bins"] = classification_metrics(to_bins(y_all[ok], CALORIE_BIN_EDGES), to_bins(pred[ok], CALORIE_BIN_EDGES), bin_scores(pred[ok], CALORIE_BIN_EDGES), ci=True)
         out["metrics_fallback"] = regression_metrics(y_all, np.where(ok, pred, train_mean))
     return out
 

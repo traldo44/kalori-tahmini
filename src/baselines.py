@@ -12,7 +12,7 @@ import numpy as np
 
 from .config import CALORIE_BIN_EDGES, FOOD101_DIR
 from .data import FOOD101_CLASSES, Food101Subset, load_n5k_split, make_val_split, read_dish_metadata
-from .metrics import classification_metrics, regression_metrics, to_bins
+from .metrics import classification_metrics, regression_metrics, bin_scores, to_bins
 from .results import log_result, save_preds
 
 NOTE = "Adım 8 naif baseline"
@@ -32,7 +32,7 @@ def calorie_baselines():
             m = regression_metrics(y, pred, ci=True)
             log_result("calorie", name, config, split, m, notes=NOTE)
             save_preds(name, ids, y, pred, split=split)
-            bins = classification_metrics(to_bins(y, CALORIE_BIN_EDGES), to_bins(pred, CALORIE_BIN_EDGES), ci=True)
+            bins = classification_metrics(to_bins(y, CALORIE_BIN_EDGES), to_bins(pred, CALORIE_BIN_EDGES), bin_scores(pred, CALORIE_BIN_EDGES), ci=True)
             log_result("calorie_bins", name, config, split, bins, notes=NOTE)
             print(f"{name:<13} {split:<5} MAE {m['MAE']:6.1f} [{m['MAE_ci_low']:.1f}–{m['MAE_ci_high']:.1f}]  "
                   f"PMAE %{m['PMAE']:.1f}  | Tablo 3 acc {bins['accuracy']:.3f}")
