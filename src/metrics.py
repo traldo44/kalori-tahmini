@@ -8,7 +8,8 @@ Güven aralıkları (bootstrap): test kümesi birkaç yüz tabak olduğu için i
 (komut satırından: python -m src.compare results/preds/a.csv results/preds/b.csv).
 """
 import numpy as np
-from sklearn.metrics import accuracy_score, f1_score, precision_recall_fscore_support, top_k_accuracy_score
+from sklearn.metrics import (accuracy_score, f1_score, precision_recall_fscore_support, roc_auc_score,
+                             top_k_accuracy_score)
 
 from .config import SEED
 
@@ -40,11 +41,25 @@ def regression_metrics(y_true, y_pred, ci=False):
 def classification_metrics(y_true, y_pred, y_score=None, ci=False):
     p, r, f1, _ = precision_recall_fscore_support(y_true, y_pred, average="macro", zero_division=0)
     out = {"accuracy": float(accuracy_score(y_true, y_pred)), "precision": float(p), "recall": float(r), "f1": float(f1)}
-    if y_score is not None:  # (N, C) olasılıklar
-        out["top5"] = float(top_k_accuracy_score(y_true, y_score, k=5, labels=np.arange(np.shape(y_score)[1])))
+    if y_score is not None:  # (N, C) olasılıklar ya da sınıf başına sıralama skoru
+        n_cls = np.shape(y_score)[1]
+        if n_cls > 5:
+            out["top5"] = float(top_k_accuracy_score(y_true, y_score, k=5, labels=np.arange(n_cls)))
+        # ROC-AUC (hocanın istediği metrik): bire-karşı-diğerleri, makro ortalama. Sıralama skoru yeter,
+        # olasılık olmak zorunda değil (AUC monoton dönüşüme duyarsız) → kalori aralıkları için bin_scores().
+        out["roc_auc"] = macro_ovr_auc(y_true, y_score)
     if ci:
         out["f1_ci_low"], out["f1_ci_high"] = bootstrap_ci(y_true, y_pred, macro_f1)
     return out
+
+
+def macro_ovr_auc(y_true, y_score):
+    """Bire-karşı-diğerleri ROC-AUC'lerin makro ortalaması. sklearn'ün çok sınıflı modu olasılık (toplam 1) ister;
+    burada sınıf başına ikili AUC alınır, böylece regresyondan türetilen sıralama skorları (bin_scores) da kullanılabilir.
+    Test kümesinde bulunmayan sınıf atlanır."""
+    y_true, y_score = np.asarray(y_true), np.asarray(y_score)
+    aucs = [roc_auc_score(y_true == c, y_score[:, c]) for c in range(y_score.shape[1]) if (y_true == c).any() and not (y_true == c).all()]
+    return float(np.mean(aucs))
 
 
 def calorie_bins(train_calories):
@@ -54,6 +69,14 @@ def calorie_bins(train_calories):
 
 def to_bins(calories, edges):
     return np.digitize(calories, edges)  # 0 = düşük, 1 = orta, 2 = yüksek
+
+
+def bin_scores(pred_calories, edges):
+    """Tahmini kcal'den Tablo 3 aralıkları için (N, 3) sıralama skoru: düşük = -kcal, orta = -|kcal - orta nokta|,
+    yüksek = kcal. ROC-AUC için yeterli; regresyon modelinin olasılığı yoktur, sıralaması vardır."""
+    p = np.asarray(pred_calories, dtype=float)
+    mid = (edges[0] + edges[1]) / 2
+    return np.stack([-p, -np.abs(p - mid), p], axis=1)
 
 
 def bootstrap_ci(y_true, y_pred, metric_fn, n_boot=1000, alpha=0.05, seed=SEED):

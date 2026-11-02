@@ -26,7 +26,7 @@ from xgboost import XGBRegressor
 # özellikler ayrı süreçte hesaplanıp .npz'den okunur.
 from .config import CALORIE_BIN_EDGES, SEED
 from .features import load
-from .metrics import classification_metrics, regression_metrics, to_bins
+from .metrics import classification_metrics, regression_metrics, bin_scores, to_bins
 from .results import log_result, save_preds
 
 NOTE = "Adım 9 klasik ML"
@@ -80,7 +80,7 @@ def run_regressor(name, data, grid, make, fit_kwargs=None):
         pred = np.clip(model.predict(X), 0, None)
         m = regression_metrics(y, pred, ci=True)
         log_result("calorie", name, cfg, split, m, notes=f"{NOTE}; val MAE: {', '.join(tried)}")
-        bins = classification_metrics(to_bins(y, CALORIE_BIN_EDGES), to_bins(pred, CALORIE_BIN_EDGES), ci=True)
+        bins = classification_metrics(to_bins(y, CALORIE_BIN_EDGES), to_bins(pred, CALORIE_BIN_EDGES), bin_scores(pred, CALORIE_BIN_EDGES), ci=True)
         log_result("calorie_bins", name, cfg, split, bins, notes=NOTE)
         save_preds(name, ids, y, pred, split=split)
         print(f"  ✓ {name} [{cfg}] {split}: MAE {m['MAE']:.1f} [{m['MAE_ci_low']:.1f}–{m['MAE_ci_high']:.1f}]  "
