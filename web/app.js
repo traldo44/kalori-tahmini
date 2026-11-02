@@ -143,6 +143,7 @@
       `<span class="etiket">${etiket(kcal)}</span>` +
       `<table>${satirlar.join("")}</table>` +
       `<div class="not">Çubuklar enerjinin makrolara dağılımı (yağ 9, karbonhidrat ve protein 4 kcal/g); makrolardan hesaplanan enerji ≈ ${fmt(toplam)} kcal.</div>` +
+      (kcal < 50 ? `<div class="not">Çok düşük değer: tabakta az yemek var ya da fotoğrafta yemek yok. Model yemek olmayan görüntülere de düşük bir sayı verir.</div>` : "") +
       `<div class="sure">Cihazda hesaplandı, ${fmt(ms)} ms.</div>`;
     sonuc.hidden = false; bos.hidden = true;
   }

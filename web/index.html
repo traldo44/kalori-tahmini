@@ -58,6 +58,7 @@
   <details>
     <summary>Sınırlılıklar</summary>
     <p>Model, Nutrition5k veri setindeki 2 752 tabakla eğitildi: tek bir kafeterya, sabit yükseklikte üst kamera, tabak başına tartılmış malzeme listesinden hesaplanan kalori. Telefon fotoğrafı bu koşullardan uzaklaştıkça (yandan açı, farklı mesafe, birden fazla tabak, paketli ürün) hata büyür.</p>
+    <p>Model "bu yemek değil" diyemez: her fotoğrafa bir sayı verir. Yemek olmayan görüntülerde (telefon, masa, boş tabak) genellikle 0–50 kcal gibi düşük bir değer çıkar; bu bir ölçüm değil, modelin "neredeyse boş tabak" yorumudur.</p>
     <p>Sonuç bir tahmindir: test kümesinde ortalama hata ±40 kcal; yüksek kalorili tabaklarda daha büyük. Tahminler bilgilendirme amaçlıdır; tıbbi veya diyet kararı için kullanılmaz.</p>
   </details>
 
