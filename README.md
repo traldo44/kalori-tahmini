@@ -490,7 +490,7 @@ log_result("calorie", "resnet50_reg", "lr1e-4_bs32_224", "test", m, notes="augme
 save_preds("resnet50_reg", dish_ids, y_true, y_pred)        # → results/preds/resnet50_reg.csv
 ```
 
-Sütunlar: `date, owner, task, model, config, split, accuracy, precision, recall, f1, f1_ci_low, f1_ci_high, top5, MAE, MAE_ci_low, MAE_ci_high, PMAE, MAPE, RMSE, R2, within_100kcal, notes`
+Sütunlar: `date, owner, task, model, config, split, accuracy, precision, recall, f1, f1_ci_low, f1_ci_high, top5, roc_auc, MAE, MAE_ci_low, MAE_ci_high, PMAE, MAPE, RMSE, R2, within_100kcal, notes`
 
 - `task`: `cls` (Food-101), `calorie` (Nutrition5k regresyon), `calorie_bins` (Tablo 3), `ablation`
 - `split`: `val`, `test`, `own_photos` (kendi fotoğraflarımız, §7 Faz 4)
