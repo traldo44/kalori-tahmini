@@ -17,7 +17,7 @@ import torch
 
 from .config import CALORIE_BIN_EDGES, CHECKPOINT_DIR, IMG_SIZE, set_seed, get_device
 from .data import TARGETS, Nutrition5kDataset, load_n5k_split, make_val_split, read_dish_metadata
-from .metrics import classification_metrics, regression_metrics, to_bins
+from .metrics import classification_metrics, regression_metrics, bin_scores, to_bins
 from .models import build_model, decode_target, encode_target, init_regression_head, model_norm, save_checkpoint
 from .results import log_result, save_preds
 from .trainer import fit, history_path, loader, predict
@@ -97,7 +97,7 @@ def main():
         m = regression_metrics(y[:, 0], pred[:, 0], ci=True)
         extra = ", ".join(f"{t} MAE {np.abs(pred[:, i] - y[:, i]).mean():.1f}" for i, t in enumerate(targets) if i)
         notes = "Adım 11–13 transfer CNN" + (f"; {extra}" if extra else "")
-        bins = classification_metrics(to_bins(y[:, 0], CALORIE_BIN_EDGES), to_bins(pred[:, 0], CALORIE_BIN_EDGES), ci=True)
+        bins = classification_metrics(to_bins(y[:, 0], CALORIE_BIN_EDGES), to_bins(pred[:, 0], CALORIE_BIN_EDGES), bin_scores(pred[:, 0], CALORIE_BIN_EDGES), ci=True)
         results[split] = m
         print(f"  ✓ {split}: MAE {m['MAE']:.1f} [{m['MAE_ci_low']:.1f}–{m['MAE_ci_high']:.1f}]  PMAE %{m['PMAE']:.1f}  "
               f"R² {m['R2']:.2f}  | Tablo 3 F1 {bins['f1']:.3f}" + (f"  | {extra}" if extra else ""), flush=True)

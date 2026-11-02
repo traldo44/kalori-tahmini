@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from src.metrics import (bootstrap_ci, calorie_bins, classification_metrics, mae,
+from src.metrics import (bin_scores, bootstrap_ci, calorie_bins, classification_metrics, mae,
                          paired_bootstrap, regression_metrics, to_bins)
 
 
@@ -54,3 +54,19 @@ def test_paired_bootstrap_detects_real_difference_and_ignores_noise():
     assert paired_bootstrap(y, good, bad)["diff"] < 0
     almost_same = good + rng.normal(0, 1, 500)
     assert not paired_bootstrap(y, good, almost_same)["significant"]
+
+
+def test_roc_auc_perfect_and_random_scores():
+    y = np.array([0, 1, 2] * 10)
+    perfect = np.eye(3)[y]
+    assert classification_metrics(y, y, perfect)["roc_auc"] == 1
+    constant = np.ones((30, 3)) / 3          # bilgi yok → 0,5
+    assert abs(classification_metrics(y, y, constant)["roc_auc"] - 0.5) < 1e-9
+    assert "top5" not in classification_metrics(y, y, perfect)   # 3 sınıfta top-5 anlamsız
+
+
+def test_bin_scores_rank_bins_correctly():
+    edges = (100.0, 300.0)
+    s = bin_scores([10, 200, 500], edges)
+    assert s.shape == (3, 3)
+    assert s[:, 0].argmax() == 0 and s[:, 1].argmax() == 1 and s[:, 2].argmax() == 2

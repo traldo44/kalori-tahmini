@@ -7,7 +7,7 @@ import os
 from .config import RESULTS_DIR
 
 COLUMNS = ["date", "owner", "task", "model", "config", "split",
-           "accuracy", "precision", "recall", "f1", "f1_ci_low", "f1_ci_high", "top5",
+           "accuracy", "precision", "recall", "f1", "f1_ci_low", "f1_ci_high", "top5", "roc_auc",
            "MAE", "MAE_ci_low", "MAE_ci_high", "PMAE", "MAPE", "RMSE", "R2", "within_100kcal", "notes"]
 
 

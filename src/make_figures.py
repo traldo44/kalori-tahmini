@@ -161,14 +161,20 @@ def results_row(results, task, model, split="test"):
     return r.iloc[-1]
 
 
+def auc_cell(r):
+    """ROC-AUC hücresi; eski satırlarda (olasılık kaydedilmeden) yoksa '—'."""
+    v = r.get("roc_auc")
+    return fmt_tr(v, 3) if pd.notna(v) else "—"
+
+
 def tablo1_md(results, models=TABLO1_MODELS):
     rows = []
     for m in models:
         r = results_row(results, "cls", m)
         ci = f" [{fmt_tr(r.f1_ci_low, 3)}–{fmt_tr(r.f1_ci_high, 3)}]" if pd.notna(r.get("f1_ci_low")) else ""
         rows.append([model_name(m), fmt_tr(100 * r.accuracy, 1, percent=True), fmt_tr(r.precision, 3), fmt_tr(r.recall, 3),
-                     fmt_tr(r.f1, 3) + ci, fmt_tr(100 * r.top5, 1, percent=True) if pd.notna(r.get("top5")) else "—"])
-    return md_table(["Tablo 1 · Food-101 (25 sınıf, test)", "Doğruluk", "Precision", "Recall", "Macro-F1 [%95 GA]", "Top-5"], rows)
+                     fmt_tr(r.f1, 3) + ci, auc_cell(r), fmt_tr(100 * r.top5, 1, percent=True) if pd.notna(r.get("top5")) else "—"])
+    return md_table(["Tablo 1 · Food-101 (25 sınıf, test)", "Doğruluk", "Precision", "Recall", "Macro-F1 [%95 GA]", "ROC-AUC", "Top-5"], rows)
 
 
 def tablo2_md(results, models=TABLO2_MODELS):
@@ -185,9 +191,9 @@ def tablo3_md(results, models=TABLO2_MODELS):
     for m in models:
         r = results_row(results, "calorie_bins", m)
         rows.append([model_name(m), fmt_tr(100 * r.accuracy, 1, percent=True), fmt_tr(r.precision, 3), fmt_tr(r.recall, 3),
-                     f"{fmt_tr(r.f1, 3)} [{fmt_tr(r.f1_ci_low, 3)}–{fmt_tr(r.f1_ci_high, 3)}]"])
+                     f"{fmt_tr(r.f1, 3)} [{fmt_tr(r.f1_ci_low, 3)}–{fmt_tr(r.f1_ci_high, 3)}]", auc_cell(r)])
     return md_table(["Tablo 3 · Kalori aralığı (düşük < 116,1 ≤ orta < 313,7 ≤ yüksek kcal, test)",
-                     "Doğruluk", "Precision (macro)", "Recall (macro)", "Macro-F1 [%95 GA]"], rows)
+                     "Doğruluk", "Precision (macro)", "Recall (macro)", "Macro-F1 [%95 GA]", "ROC-AUC (OvR, macro)"], rows)
 
 
 def tablo_ablation_md(results, models=ABLATION_MODELS):
