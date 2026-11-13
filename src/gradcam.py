@@ -1,8 +1,8 @@
 """Grad-CAM: kalori modelinin tabağın neresine baktığı (Adım 15 figürü).
 
 Kullanım:
-    python -m src.gradcam --ckpt checkpoints/convnext_tiny_reg.pt            # → results/figures/eval_gradcam.png
-    python -m src.gradcam --ckpt checkpoints/convnext_tiny_reg.pt --n 4 --device cpu
+    python -m src.gradcam --ckpt checkpoints/convnext_tiny_reg_mt.pt           # → results/figures/eval_gradcam.png
+    python -m src.gradcam --ckpt checkpoints/convnext_tiny_reg_mt.pt --n 4 --device cpu
 
 Regresyonda "sınıf skoru" yok; tahmin edilen kalorinin son evre özellik haritasına göre gradyanı alınır.
 Isı haritası kırmızıysa o bölge tahmini yukarı çekiyor. Hangi tabaklar: tahmin dosyasındaki en iyi n
@@ -59,7 +59,7 @@ def gradcam(model, x, layer):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--ckpt", required=True)
-    ap.add_argument("--preds", default=str(RESULTS_DIR / "preds" / "convnext_tiny_reg.csv"))
+    ap.add_argument("--preds", default=str(RESULTS_DIR / "preds" / "convnext_tiny_reg_mt.csv"))
     ap.add_argument("--n", type=int, default=4, help="en iyi n + en kötü n tabak")
     ap.add_argument("--device", default="cpu", help="cpu güvenli; mps'te backward kancaları bazen boş döner")
     ap.add_argument("--out", default="eval_gradcam")
@@ -95,7 +95,7 @@ def main():
             a.set_xticks([]); a.set_yticks([]); a.grid(False)
             for sp in a.spines.values():
                 sp.set_visible(False)
-    fig.suptitle("Grad-CAM, ConvNeXt-T kalori modeli: kırmızı bölgeler tahmini yukarı çekiyor (test tabakları)", x=0.01, ha="left")
+    fig.suptitle("Grad-CAM, ConvNeXt-T çok görevli kalori modeli: kırmızı bölgeler tahmini yukarı çekiyor (test tabakları)", x=0.01, ha="left")
     fig.tight_layout()
     path = plot_style.savefig(fig, args.out, dpi=130)
     print(f"kaydedildi: {path}")

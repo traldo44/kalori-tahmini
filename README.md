@@ -173,35 +173,42 @@ Gemini 3.5 Flash-Lite, 512 px JPEG, sıcaklık 0, sabit prompt (kalemler + gram 
 
 ### Değerlendirme bulguları (Adım 15, `python -m src.make_figures` + `python -m src.gradcam`)
 
-Bütün figürler `results/preds/` ve `results/history/` dosyalarından üretilir; GPU ve checkpoint gerekmez (yalnızca Grad-CAM için `checkpoints/convnext_tiny_reg.pt`). Rapora yapıştırmaya hazır tablolar: `results/tablo1.md`, `tablo2.md` (precision/recall ve RMSE dahil), `tablo3_kalori_araligi.md` (ROC-AUC sütunuyla: final model 0,960, VLM 0,884, naif 0,500), `tablo_ablation.md` (Adım 17). Tablo 1'in ROC-AUC sütunu notebook 13 ile doldu (0,997–0,998).
+Bütün figürler `results/preds/` ve `results/history/` dosyalarından üretilir; GPU ve checkpoint gerekmez (yalnızca Grad-CAM için `checkpoints/convnext_tiny_reg_mt.pt`). **13 Kasım (Adım 20):** figürler final modellerle yeniden üretildi (kalori: ConvNeXt-T çok görevli, sınıflandırma: ViT-B/16 384 px; betiklerin varsayılanı artık bunlar) ve ROC figürü eklendi. Rapora yapıştırmaya hazır tablolar: `results/tablo1.md`, `tablo2.md` (precision/recall ve RMSE dahil), `tablo3_kalori_araligi.md` (ROC-AUC sütunuyla: final model 0,960, VLM 0,884, naif 0,500), `tablo_ablation.md` (Adım 17). Tablo 1'in ROC-AUC sütunu notebook 13 ile doldu (0,997–0,998).
 
-| Tablo 3 · Kalori aralığı (düşük < 116,1 ≤ orta < 313,7 ≤ yüksek kcal, test) | Doğruluk | Precision (macro) | Recall (macro) | Macro-F1 [%95 GA] |
-| --- | --- | --- | --- | --- |
-| Naif: train ortalaması | %31,4 | 0,104 | 0,333 | 0,159 [0,142–0,174] |
-| Donmuş ResNet-50 → XGBoost | %74,2 | 0,771 | 0,742 | 0,747 [0,708–0,785] |
-| ResNet-50 (timm başlatması) | %80,5 | 0,814 | 0,804 | 0,806 [0,768–0,839] |
-| ResNet-50 çok görevli | %79,9 | 0,808 | 0,798 | 0,799 [0,763–0,832] |
-| EfficientNet-B0 | %81,7 | 0,821 | 0,815 | 0,817 [0,781–0,848] |
-| ViT-B/16 | %86,0 | 0,861 | 0,859 | 0,859 [0,827–0,889] |
-| ConvNeXt-T | %86,2 | 0,864 | 0,861 | 0,861 [0,828–0,889] |
+| Tablo 3 · Kalori aralığı (düşük < 116,1 ≤ orta < 313,7 ≤ yüksek kcal, test) | Doğruluk | Precision (macro) | Recall (macro) | Macro-F1 [%95 GA] | ROC-AUC (OvR, macro) |
+| --- | --- | --- | --- | --- | --- |
+| Naif: train ortalaması | %31,4 | 0,104 | 0,333 | 0,159 [0,142–0,174] | 0,500 |
+| Donmuş ResNet-50 → XGBoost | %74,2 | 0,771 | 0,742 | 0,747 [0,708–0,785] | 0,899 |
+| ResNet-50 (timm başlatması) | %80,5 | 0,814 | 0,804 | 0,806 [0,768–0,839] | 0,933 |
+| ResNet-50 (erken durdu, 14/30) | %79,1 | 0,804 | 0,790 | 0,790 [0,756–0,826] | 0,922 |
+| ResNet-50 çok görevli | %79,9 | 0,808 | 0,798 | 0,799 [0,763–0,832] | 0,936 |
+| EfficientNet-B0 (hatalı başlatma) | %59,8 | 0,611 | 0,595 | 0,600 [0,558–0,639] | 0,797 |
+| EfficientNet-B0 | %81,7 | 0,821 | 0,815 | 0,817 [0,781–0,848] | 0,943 |
+| ViT-B/16 | %86,0 | 0,861 | 0,859 | 0,859 [0,827–0,889] | 0,958 |
+| ConvNeXt-T | %86,2 | 0,864 | 0,861 | 0,861 [0,828–0,889] | 0,956 |
+| ConvNeXt-T çok görevli | %87,0 | 0,872 | 0,869 | 0,869 [0,837–0,897] | 0,960 |
+| ConvNeXt-T, log1p hedef | %87,2 | 0,875 | 0,871 | 0,871 [0,839–0,899] | 0,962 |
+| ConvNeXt-T, artırmasız | %85,6 | 0,862 | 0,856 | 0,857 [0,825–0,885] | 0,953 |
+| VLM sıfır-atış (Gemini 3.5 Flash-Lite) | %75,7 | 0,750 | 0,752 | 0,751 [0,713–0,784] | 0,884 |
 
 | Figür | Dosya (`results/figures/`) | Açıklama |
 | --- | --- | --- |
-| Karışıklık matrisi | `eval_karisiklik_matrisi.png` | ViT-B/16, Food-101 25 sınıf, test; satırlar gerçek sınıf, hücreler satır içi yüzde; yalnızca ≥ %2'lik karışmalar yazılı |
-| Sınıf başına F1 | `eval_sinif_f1.png` | ViT-B/16 çubuk, ConvNeXt-T nokta; en zor sınıflar en altta (apple pie 0,89) |
-| Tahmin–gerçek | `eval_tahmin_gercek.png` | ConvNeXt-T test tahminleri; gölgeli bant ±100 kcal; turuncu = 23 balıklı tabak |
-| Hata histogramı | `eval_hata_histogrami.png` | İşaretli hata (tahmin − gerçek), ConvNeXt-T ve ViT-B/16; ortalama −12, medyan +1 kcal |
+| Karışıklık matrisi | `eval_karisiklik_matrisi.png` | ViT-B/16 384 px, Food-101 25 sınıf, test; satırlar gerçek sınıf, hücreler satır içi yüzde; yalnızca ≥ %2'lik karışmalar yazılı |
+| Sınıf başına F1 | `eval_sinif_f1.png` | ViT-B/16 384 px çubuk, ConvNeXt-T nokta; en zor sınıflar en altta (apple pie 0,91) |
+| ROC eğrileri | `eval_roc.png` | Sol: ViT-B/16 384 px, 25 sınıfın bire-karşı-hepsi eğrisi + makro ortalama (AUC 0,998). Sağ: beş modelin makro eğrisi, FPR log ölçekte (farklar yalnızca FPR < %1'de görünür) |
+| Tahmin–gerçek | `eval_tahmin_gercek.png` | ConvNeXt-T çok görevli test tahminleri; gölgeli bant ±100 kcal; turuncu = 23 balıklı tabak |
+| Hata histogramı | `eval_hata_histogrami.png` | İşaretli hata (tahmin − gerçek), ConvNeXt-T çok görevli ve tek görevli; ortalama −11, medyan −1 kcal |
 | Aralık başına MAE | `eval_aralik_mae.png` | Gerçek kalori aralığına göre test MAE, tüm kalori modelleri (`results/eval_aralik_mae.csv`) |
 | Model karşılaştırma | `eval_model_karsilastirma.png` | Test MAE + %95 GA; literatür çizgileri 80,7 / 70,6 ve 37–40 bandı |
 | Eğitim eğrileri | `eval_egitim_egrileri.png` | Val skoru – epoch; nokta = saklanan en iyi epoch |
-| En kötü 20 tabak | `eval_en_kotu_tabaklar.png` | ConvNeXt-T, mutlak hata; liste `results/eval_en_kotu_20.csv` |
-| Grad-CAM | `eval_gradcam.png` | ConvNeXt-T; en iyi 4 ve en kötü 4 test tabağı, kırmızı = tahmini yukarı çeken bölge |
+| En kötü 20 tabak | `eval_en_kotu_tabaklar.png` | ConvNeXt-T çok görevli, mutlak hata; liste `results/eval_en_kotu_20.csv` |
+| Grad-CAM | `eval_gradcam.png` | ConvNeXt-T çok görevli; en iyi 4 ve en kötü 4 test tabağı, kırmızı = tahmini yukarı çeken bölge |
 
-1. **Hata kaloriyle birlikte büyüyor.** ConvNeXt-T'de aralık başına MAE: düşük 16, orta 32, yüksek 76 kcal (naif: 201 / 54 / 241). Modeller arasındaki fark en çok yüksek aralıkta açılıyor.
-2. **En kötü 20 tabağın 18'i yüksek kalorili tabakların eksik tahmini** (gerçek 380–1013, tahmin 120–768 kcal). Ortak örüntü: yeşilliğin altına gizlenmiş 100–240 g tavuk/sığır/domuz (ör. 902 → 424 kcal, 205 g tavuk + brokoli). Tek fazla tahmin var (117 → 323). Grad-CAM bunu doğruluyor: kötü tahminlerde model yemeğin üstündeki yeşilliğe bakıyor, altındaki proteini görmüyor. Balık en kötü 20'nin yalnızca 3'ünde, yani ortalama balık hatasını yükseltiyor ama en büyük hataların sebebi değil.
-3. **Kardeş tabaklar listede çift çift görünüyor:** üç çift (`1565811139/1565811061`, `1566414412/1566414342`, `1563389626/1563389600`) aynı tabağın art arda halleri. Bir tabak (`1558373159`, 1013 kcal) malzeme listesinde 142 g "deprecated" içeriyor → etiket kalitesi sorunu, raporda örnek olarak verilebilir.
-4. **Sınıflandırmada hatalar beklenen çiftlerde toplanıyor:** apple pie → pancakes 7, caesar → greek salad 7, fried rice ↔ risotto 7+6, carbonara → bolognese 6, lasagna → omelette 6, pizza → lasagna 6 (`results/eval_karisan_ciftler.csv`). Apple pie en zayıf sınıf (recall %85) ve ilk 10 çiftin 4'ünde var; EDA'da bilerek bırakılan karışabilir çiftler tam da hatanın toplandığı yer.
-5. **Tablo 3'te ConvNeXt-T ile ViT-B/16 ayırt edilemiyor** (0,861 ve 0,859, GA'lar üst üste); üç aralıklı sınıflandırma MAE'deki farkı görmeye yetmiyor.
+1. **Hata kaloriyle birlikte büyüyor.** Final modelde (ConvNeXt-T çok görevli) aralık başına MAE: düşük 16, orta 31, yüksek 73 kcal (naif: 201 / 54 / 241). Modeller arasındaki fark en çok yüksek aralıkta açılıyor.
+2. **En kötü 20 tabağın 19'u eksik tahmin** (gerçek 380–1051, tahmin 108–867 kcal; final model, tek görevli modelin listesiyle 17 ortak). Ortak örüntü: yeşilliğin altına gizlenmiş 100–240 g tavuk/sığır/domuz (ör. 902 → 428 kcal, 205 g tavuk + brokoli). Tek fazla tahmin var (252 → 419, brownie). Grad-CAM bunu doğruluyor: kötü tahminlerde model yemeğin üstündeki yeşilliğe bakıyor, altındaki proteini görmüyor. Balık en kötü 20'nin yalnızca 2'sinde, yani ortalama balık hatasını yükseltiyor ama en büyük hataların sebebi değil.
+3. **Kardeş tabaklar listede çift çift görünüyor:** üç çift (`1565811139/1565811061`, `1566414412/1566414342`, `1560367952/1560367980`) aynı tabağın art arda halleri. Bir tabak (`1558373159`, 1013 kcal) malzeme listesinde 142 g "deprecated" içeriyor → etiket kalitesi sorunu, raporda örnek olarak verilebilir.
+4. **Sınıflandırmada hatalar beklenen çiftlerde toplanıyor:** ViT-B/16 384 px'te fried rice ↔ risotto 7+7, apple pie → pancakes 6, hamburger → hot dog 6, ice cream ↔ apple pie 6+5, lasagna → apple pie 6, greek → caesar salad 5 (`results/eval_karisan_ciftler.csv`). Apple pie en zayıf sınıf (F1 0,91, recall %92) ve ilk 10 çiftin 4'ünde var; EDA'da bilerek bırakılan karışabilir çiftler tam da hatanın toplandığı yer.
+5. **Tablo 3'te en iyi ConvNeXt-T türevleri ile ViT-B/16 ayırt edilemiyor** (0,857–0,871, GA'lar üst üste); üç aralıklı sınıflandırma MAE'deki farkı görmeye yetmiyor.
 6. **Adım 16–17 için seçilen teknikler (kanıta dayalı):** (a) yüksek kalori eksik tahmini → `log1p` hedef veya göreli kayıp ablation'ı (`train_reg.py --target log1p` hazır), kütle-farkındalı başlık (çok görevli ConvNeXt-T); (b) kardeş sızıntısı → test tabaklarını `time_groups` ile gruplayıp "dizinin ilk tabağı" ve "sonrakiler" için MAE'yi ayrı raporlamak; (c) balık MAE'si ayrı sütun olarak (yapıldı); (d) sınıflandırmada apple pie / tatlı karışmaları için hedefli augmentasyon veya daha yüksek çözünürlük (ViT 384) ablation'ı.
 
 ### Kardeş-sızıntısı ölçümü (Adım 16, `python -m src.leakage`)
@@ -247,7 +254,7 @@ EDA'daki endişe: resmi test tabaklarının %22'sinin train'de "kardeşi" var (1
 | 4 | Değerlendirme + VLM referansı | Adım 15 ✅ (figürler, Tablo 1–3) · Adım 14 ✅ (Gemini 3.5 Flash-Lite 82,1 kcal, 507 tabak) |
 | 5–6 | Final model (Adım 18) | ✅ Kalori: ConvNeXt-T çok görevli (40,3 kcal; `checkpoints/convnext_tiny_reg_mt.pt`, demo varsayılanı). Sınıflandırma: ViT-B/16 384 px (F1 0,957). Gerekçe §2 ablation madde 1 ve 4. Ekip itiraz ederse tek satırlık değişiklik |
 | 5 | İyileştirme ve ablation | Adım 16 ✅ (hata analizi §2; kardeş-sızıntısı ölçüldü, etkisi yok) · Adım 17 ✅ (`notebooks/12_ablation_kaggle_adim17.ipynb`; ablation tablosu ve bulguları §2'de) |
-| — | Tablolar, figürler, kodun temizlenmesi | Tablolar + figürler ✅ (`src/make_figures.py` ile yeniden üretilir) · kod temizliği ⬜ |
+| — | Tablolar, figürler, kodun temizlenmesi | Tablolar + figürler ✅ (`src/make_figures.py` ile yeniden üretilir; final modellerle, ROC figürü dahil) · kod temizliği ✅ (Adım 20, 13 Kasım) |
 | 6–7 | Rapor ve sunum | ⬜ Geliştirmeden sonra |
 
 **Kısaca:** Adım 1–17 bitti. En iyiler: sınıflandırmada **ViT-B/16 384 px, F1 0,957**; kaloride **ConvNeXt-T çok görevli, test MAE 40,3 kcal (PMAE %15,8)**, tek görevli ConvNeXt-T'den (41,4) anlamlı farklı değil. Ablation: veri artırması anlamlı (+4,7 kcal onsuz), `log1p` ve çok görevli başlık anlamsız fark, 384 px küçük ama anlamlı F1 kazancı ve 4 kat maliyet. VLM referansı (Gemini 3.5 Flash-Lite) **82,1 kcal**: literatürdeki 80,7 ile tutarlı, ConvNeXt-T'den anlamlı kötü, klasik ML ile başa baş. Hata analizi: en büyük hatalar yeşilliğin altına gizlenmiş proteinli yüksek kalorili tabaklarda (Grad-CAM doğruluyor); kardeş-sızıntısı test MAE'sini iyimser yapmıyor (ölçüldü, §2). Final (Adım 18): kalori ConvNeXt-T çok görevli, sınıflandırma ViT-B/16 384 px; §1'de özet. Sıradaki: **Adım 19** (kendi fotoğraflarımız; demo hazır), **Adım 20** (toparlama).
@@ -292,9 +299,9 @@ Adımlar sırayla yapılır; her adımın bir çıktısı ve bir "bitti" kriteri
 | 19 | 9 | Demo: fotoğraf yükle → kcal (`app.py` iskeleti hazır) + kendi fotoğraflarımızla test (§7 Faz 4) | Çalışan demo, kısa bir video kaydı, `own_photos` satırları |
 | 20 | 9 | Toparlama: figürlerin son hali, kod temizliği, README | `main` dalında baştan sona çalışan kod. **Kontrol noktası 3** |
 
-**Durum (2 Kasım):** Adım 1–18 ✅ · Adım 19 web demosu ✅ yayında (fotoğraflar bekleniyor) · Adım 20 ⏳ · Teslim kuralları §9'da; ROC-AUC (notebook 13) ✅ 13 Kasım · Kontrol noktası 1 ✅ · Kontrol noktası 2 ✅
+**Durum (2 Kasım):** Adım 1–18 ✅ · Adım 19 web demosu ✅ yayında (fotoğraflar bekleniyor) · Adım 20 ✅ kod + figürler (README sadeleştirme fotoğraflardan sonra) · Teslim kuralları §9'da; ROC-AUC (notebook 13) ✅ 13 Kasım · Kontrol noktası 1 ✅ · Kontrol noktası 2 ✅
 
-**Adım 18 — final model (1 Kasım):** kalori için **ConvNeXt-T çok görevli** (`convnext_tiny_reg_mt`: 40,3 kcal; tek görevliyle fark anlamsız, kütle + makro çıktıları bedava), sınıflandırma için **ViT-B/16 384 px** (0,957; hız gerekiyorsa ConvNeXt-T 0,941 ile 6,5 kat hızlı). Final test ölçümleri `results.csv`'de (Adım 17 satırları, yeniden ölçüm gerekmedi: test bir kez, Kaggle'da ölçüldü); özet §1'de, "Bu çalışma" satırı §2 Hedeflerimiz'de. Checkpoint `checkpoints/convnext_tiny_reg_mt.pt` Mac'te (git dışı; Release'ten `GH_TOKEN=$(gh auth token) python scripts/share_checkpoint.py download convnext_tiny_reg_mt.pt`). Demo (`python app.py`) bu modelle doğrulandı: kalori CSV'deki tahminle birebir, altta kütle ve makrolar görünüyor. Adım 15'teki figürler ve hata analizi tek görevli ConvNeXt-T içindir; iki modelin tahminleri %99,3 korelasyonlu, "en kötü 20" listesinin 17'si ortak, bu yüzden analiz final model için de geçerli ve figürler yeniden üretilmedi (ekip isterse `python -m src.make_figures --reg-model convnext_tiny_reg_mt --reg-second convnext_tiny_reg` ve `python -m src.gradcam --ckpt checkpoints/convnext_tiny_reg_mt.pt`).
+**Adım 18 — final model (1 Kasım):** kalori için **ConvNeXt-T çok görevli** (`convnext_tiny_reg_mt`: 40,3 kcal; tek görevliyle fark anlamsız, kütle + makro çıktıları bedava), sınıflandırma için **ViT-B/16 384 px** (0,957; hız gerekiyorsa ConvNeXt-T 0,941 ile 6,5 kat hızlı). Final test ölçümleri `results.csv`'de (Adım 17 satırları, yeniden ölçüm gerekmedi: test bir kez, Kaggle'da ölçüldü); özet §1'de, "Bu çalışma" satırı §2 Hedeflerimiz'de. Checkpoint `checkpoints/convnext_tiny_reg_mt.pt` Mac'te (git dışı; Release'ten `GH_TOKEN=$(gh auth token) python scripts/share_checkpoint.py download convnext_tiny_reg_mt.pt`). Demo (`python app.py`) bu modelle doğrulandı: kalori CSV'deki tahminle birebir, altta kütle ve makrolar görünüyor. Adım 15 figürleri ve hata analizi 13 Kasım'da (Adım 20) final modellerle yeniden üretildi; tek görevli modelin en kötü 20 listesiyle 17 tabak ortak, bulgular değişmedi (§2 "Değerlendirme bulguları").
 
 **Sıradaki adım:**
 0. **Adım 19 fotoğrafları** (tek eksik sizden): 15–20 tabak fotoğrafı + tartı (§7 Faz 4). Fotoğraflar `own_photos/` + `labels.csv`'ye konunca `python -m src.eval_own_photos --ckpt checkpoints/convnext_tiny_reg_mt.pt --model convnext_tiny_reg_mt` sonucu `results.csv`'ye `own_photos`, `own_photos_ust`, `own_photos_yan` satırları olarak yazar. Demo: `python app.py` (Mac'te) veya Vercel'deki statik sürüm (§7 "Web demosu"; Vercel projesini kullanıcı bağlar: Root Directory `web`).
@@ -682,6 +689,7 @@ Kaynak: `Yapay_Zeka_Proje_Teslim_ve_Sunum_Kurallari.docx` (hoca, 2 Kasım). Tesl
 
 | Tarih | Kim | Son tamamlanan adım | Yarım kalan iş / sıradaki adım | Notlar (değişen ayarlar, sorunlar) |
 | --- | --- | --- | --- | --- |
+| 2026-11-13 | traldo | Adım 20 (kod + figürler): figürler final modellerle (ViT-B/16 384 px, ConvNeXt-T çok görevli) yeniden üretildi, `eval_roc.png` eklendi, Grad-CAM final modelle; `make_figures`/`gradcam` varsayılanları final modeller; kullanılmayan import ve eskimiş TODO temizlendi; tüm CLI'lar `--help` ile açılıyor; 64 test | Adım 19 fotoğrafları → sonra README'nin rapor için son hali · rapor/sunum (ekip yazar) | `src.baselines` daha önce argüman almıyordu: `--help` bile baseline'ları yeniden çalıştırıp `results.csv`'ye yinelenen satır yazıyordu; artık argparse var. Bulgu sayıları final modele göre güncellendi (en kötü 20: 19 eksik tahmin, 2 balıklı; apple pie F1 0,91) |
 | 2026-11-13 | traldo | Notebook 13 ✅ (Kaggle): 5 sınıflandırma modeli ROC-AUC ile yeniden değerlendirildi; Tablo 1'de ROC-AUC sütunu (0,997–0,998, ViT-384 0,998) | Adım 19 fotoğrafları · Adım 20 toparlama · rapor/sunum (ekip yazar) | F1'ler ilk run'larla birebir. ROC-AUC tavanda olduğu için modelleri ayırmıyor; karşılaştırma Macro-F1 ile. Olasılıklar `results/probs/*.npz` (~2 MB). İlk Kaggle denemesi push etmedi, ikincisi geçti |
 | 2026-11-02 | traldo | Hocanın teslim kuralları işlendi (§9); ROC-AUC eklendi: `metrics.macro_ovr_auc`, `bin_scores`, `results.csv`'ye `roc_auc` sütunu (33 calorie_bins satırı geri dolduruldu), Tablo 1/3'te sütun, `src/eval_cls.py`, notebook 13 | Notebook 13'ü Kaggle'da çalıştır (Tablo 1 ROC-AUC) · fotoğraflar · rapor/sunum (ekip yazar, YZ oranı ≤ %40) | Teslim: rapor + kod + sunum → yapayzekaproje80@gmail.com, tarih yok. Web demosu yayında: https://kalori-tahmini-web.vercel.app (Worker'da çıkarım, Cache API) |
 | 2026-11-01 | traldo | Adım 19 web demosu, Vercel sürümü ✅ (`web/`: tarayıcı içi ONNX, `scripts/export_onnx.py`) | kendi fotoğraflar · Adım 20 (README'yi rapora hazırla) | HF Gradio Space ücretsiz hesapta kapandı (402). Model int8 ONNX 28 MB, doğruluk kaybı yok (100 tabakta 39,9 → 40,0). Sayfa çerçevesiz HTML/JS, onnxruntime-web CDN; Gradio demosu (`app.py`) sade temayla yeniden tasarlandı, ikisi aynı sonuç kartını gösterir. `onnx`, `onnxruntime` requirements'a eklendi |

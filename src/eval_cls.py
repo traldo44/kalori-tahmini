@@ -11,7 +11,6 @@ import argparse
 from pathlib import Path
 
 import numpy as np
-import torch
 
 from .config import IMG_SIZE, RESULTS_DIR, get_device
 from .data import FOOD101_CLASSES, Food101Subset

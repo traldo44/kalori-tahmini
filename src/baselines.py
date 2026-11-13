@@ -54,6 +54,8 @@ def classification_baselines():
 
 
 if __name__ == "__main__":
+    import argparse
+    argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter).parse_args()
     calorie_baselines()
     if (FOOD101_DIR / "food-101" / "meta" / "train.json").exists():
         classification_baselines()
