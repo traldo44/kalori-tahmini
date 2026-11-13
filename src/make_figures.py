@@ -17,11 +17,12 @@ görüntüleri kullanır (yoksa gri kutu çizilir). Her figür için README'ye y
     eval_model_karsilastirma.png  test MAE + %95 güven aralığı, literatür referans çizgileri
     eval_egitim_egrileri.png      doğrulama skoru – epoch
     eval_en_kotu_tabaklar.png     en kötü 20 tabak ızgarası, eval_en_kotu_20.csv → Adım 16
+    eval_roc.png                  ROC eğrileri (bire-karşı-hepsi): final sınıflandırıcının 25 sınıfı + modellerin makro
+                                  ortalaması; results/probs/ varsa (notebook 13)
     tablo1.md, tablo2.md, tablo3_kalori_araligi.md   rapora yapıştırılacak markdown tablolar
 
-TODO (Adım 16): Grad-CAM / attention haritaları için kanca — en kötü 20 tabağın kimlikleri eval_en_kotu_20.csv'de;
-checkpoint indirildikten sonra (Release `checkpoints`, ~111 MB) `src.models.build_model` ile yüklenip bu kimlikler
-üzerinde çalıştırılacak. Bu betik checkpoint gerektirmez.
+Grad-CAM (Adım 16) ayrı betikte: `python -m src.gradcam --ckpt checkpoints/<model>.pt` (checkpoint gerekir);
+en kötü 20 tabağın kimlikleri eval_en_kotu_20.csv'de. Bu betik checkpoint gerektirmez.
 """
 import argparse
 import math
@@ -31,7 +32,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from PIL import Image
-from sklearn.metrics import confusion_matrix, f1_score
+from sklearn.metrics import auc, confusion_matrix, f1_score, roc_curve
 
 from . import plot_style
 from .config import CALORIE_BIN_EDGES, N5K_DIR, RESULTS_DIR
@@ -379,6 +380,40 @@ def fig_training_curves(hist_reg, hist_cls):
     return fig
 
 
+def macro_roc(y_true, probs, grid=None):
+    """Bire-karşı-hepsi ROC: sınıf eğrileri ve ortak FPR ızgarasında makro ortalama eğri (+ makro AUC)."""
+    grid = np.linspace(0, 1, 1001) if grid is None else grid
+    y_true, probs = np.asarray(y_true), np.asarray(probs, dtype=float)
+    curves, tprs = [], []
+    for k in range(probs.shape[1]):
+        fpr, tpr, _ = roc_curve(y_true == k, probs[:, k])
+        curves.append((fpr, tpr))
+        tprs.append(np.interp(grid, fpr, tpr))
+    mean_tpr = np.mean(tprs, axis=0)
+    mean_tpr[0] = 0.0
+    return curves, grid, mean_tpr, float(np.mean([auc(f, t) for f, t in curves]))
+
+
+def fig_roc(main_name, main_curves, macro):
+    """Sol: ana modelin 25 sınıf eğrisi (gri) + makro ortalaması. Sağ: modellerin makro eğrileri, FPR log ekseninde
+    (AUC'lar 0,997–0,998 olduğundan farklar yalnızca düşük FPR'de görünür)."""
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(10, 4.4))
+    for fpr, tpr in main_curves:
+        a1.plot(fpr, tpr, color=AXIS, lw=0.8)
+    grid, mean_tpr, mauc = macro[main_name]
+    a1.plot(grid, mean_tpr, color=SERIES[0], label=f"makro ortalama (AUC {fmt_tr(mauc, 3)})")
+    a1.plot([0, 1], [0, 1], ls=":", color=INK["muted"], lw=1)
+    a1.set(xlabel="Yanlış pozitif oranı", ylabel="Doğru pozitif oranı", title=f"ROC, sınıf başına — {main_name}")
+    a1.legend(loc="lower right")
+    for i, (name, (grid, mean_tpr, mauc)) in enumerate(macro.items()):
+        a2.plot(grid[1:], mean_tpr[1:], color=SERIES[i % len(SERIES)], lw=1.6, label=f"{name} ({fmt_tr(mauc, 3)})")
+    a2.set_xscale("log")
+    a2.set(xlim=(1e-3, 1), xlabel="Yanlış pozitif oranı (log)", ylabel="Doğru pozitif oranı", title="Makro ROC, modeller")
+    a2.legend(loc="lower right", fontsize=8)
+    fig.tight_layout()
+    return fig
+
+
 def fig_worst_dishes(worst, img_dir, ncols=5, w=2.6):
     """worst: id, y_true, y_pred, abs_error, has_fish. Görüntü yoksa gri kutu."""
     ncols = max(1, min(ncols, len(worst)))
@@ -406,10 +441,10 @@ def fig_worst_dishes(worst, img_dir, ncols=5, w=2.6):
 
 def parse_args(argv=None):
     ap = argparse.ArgumentParser(description="Adım 15 değerlendirme figürleri ve Tablo 1–3 (results/ kayıtlarından).")
-    ap.add_argument("--cls-model", default="vit_b16_cls", help="karışıklık matrisi ve sınıf F1 için model")
+    ap.add_argument("--cls-model", default="vit_b16_384_cls", help="karışıklık matrisi ve sınıf F1 için model")
     ap.add_argument("--cls-second", default="convnext_tiny_cls", help="sınıf F1 üstüne bindirilecek ikinci model ('' = yok)")
-    ap.add_argument("--reg-model", default="convnext_tiny_reg", help="saçılım, histogram ve en kötü tabaklar için model")
-    ap.add_argument("--reg-second", default="vit_b16_reg", help="histograma bindirilecek ikinci model ('' = yok)")
+    ap.add_argument("--reg-model", default="convnext_tiny_reg_mt", help="saçılım, histogram ve en kötü tabaklar için model")
+    ap.add_argument("--reg-second", default="convnext_tiny_reg", help="histograma bindirilecek ikinci model ('' = yok)")
     ap.add_argument("--worst-k", type=int, default=20)
     ap.add_argument("--results-dir", type=Path, default=RESULTS_DIR, help="results.csv, preds/, history/ burada; md/csv çıktıları buraya")
     ap.add_argument("--figures-dir", type=Path, default=None, help="varsayılan: <results-dir>/figures")
@@ -515,7 +550,22 @@ def main(argv=None):
     print(f"\nEn kötü {len(worst)} tabak → results/eval_en_kotu_20.csv  (balıklı: {int(worst.has_fish.sum())})")
     print(worst[["id", "y_true", "y_pred", "abs_error", "has_fish", "top_ingredients"]].round(0).to_string(index=False), "\n")
 
-    # 10. tablolar
+    # 10. ROC eğrileri (olasılıklar yalnızca notebook 13'ten sonra var)
+    probs_dir = results_dir / "probs"
+    roc_models = [m for m in HISTORY_CLS[::-1] if (probs_dir / f"{m}_test.npz").exists()]
+    if args.cls_model in roc_models:
+        macro, main_curves = {}, None
+        for m in roc_models:
+            d = np.load(probs_dir / f"{m}_test.npz")
+            curves, grid, mean_tpr, mauc = macro_roc(d["y_true"], d["probs"])
+            macro[fig_name(m)] = (grid, mean_tpr, mauc)
+            if m == args.cls_model:
+                main_curves = curves
+        save(fig_roc(cls_name, main_curves, macro), "eval_roc")
+        caption("eval_roc", f"ROC eğrileri (Food-101 test, bire-karşı-hepsi). Sol: {cls_name}, 25 sınıf (gri) ve makro "
+                "ortalama. Sağ: beş modelin makro eğrisi, yanlış pozitif oranı log ölçekte; parantezde makro ROC-AUC.")
+
+    # 11. tablolar
     for name, text in [("tablo1.md", tablo1_md(results)), ("tablo2.md", tablo2_md(results)),
                        ("tablo3_kalori_araligi.md", tablo3_md(results)),
                        ("tablo_ablation.md", tablo_ablation_md(results))]:

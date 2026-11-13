@@ -7,7 +7,7 @@ Bu dosya, projeye başka bir Claude hesabından/oturumundan devam edebilmek içi
 - **Kullanıcı:** Mert Aydıngüneş (git kimliği `Mert Aydıngüneş <aydingunesmert@gmail.com>`, GitHub/Kaggle `traldo44`, HF `traldo`). Türkçe yazar, Türkçe yanıt ister. Kendini kod hatırlamakta zayıf diye tanımlar; az soru, somut varsayılan, hızlı ilerleme ister ("bitti mi", "devam"). Ekip arkadaşı planı yazdı, henüz GitHub'a eklenmedi (kullanıcı adı bilinmiyor).
 - **Proje:** Yapay Zekâ dersi bitirme projesi: tek bir üstten yemek fotoğrafından kalori (+ kütle, makro) tahmini; ayrıca Food-101 (25 sınıf) yemek türü sınıflandırması; klasik ML, literatür ve sıfır-atış VLM ile karşılaştırma.
 - **Repo:** `~/Desktop/kalori-tahmini`, özel GitHub reposu `https://github.com/traldo44/kalori-tahmini`, dal `main`. İş akışı: özellik dalı → `git merge --no-ff` → `main` → push. `results/results.csv` için `merge=union`.
-- **Ortam:** `.venv` (Python 3.12, uv ile; **venv'de pip yok** → paket için `uv pip install --python .venv/bin/python <paket>`; düz `pip` sistemin Python 3.9'una kurar, yanlış). Testler: `.venv/bin/python -m pytest -q` (şu an 63 test geçiyor). Mac M4, torch MPS çalışır; ağır eğitim Kaggle'da.
+- **Ortam:** `.venv` (Python 3.12, uv ile; **venv'de pip yok** → paket için `uv pip install --python .venv/bin/python <paket>`; düz `pip` sistemin Python 3.9'una kurar, yanlış). Testler: `.venv/bin/python -m pytest -q` (şu an 64 test geçiyor). Mac M4, torch MPS çalışır; ağır eğitim Kaggle'da.
 - **Veri (git dışı):** `data/nutrition5k` (üst kamera RGB, metadata), `data/food101` (25 sınıf alt küme, GitHub Release `data`), `data/food101_raw` (~5 GB ham, silinebilir). Checkpoint'ler GitHub Release `checkpoints`'ta; Mac'te `checkpoints/convnext_tiny_reg.pt` ve `checkpoints/convnext_tiny_reg_mt.pt` (111 MB'şar) var.
 - **Canlı demo:** https://kalori-tahmini-web.vercel.app (Vercel, GitHub `main`'den otomatik; kök dizin `web/`). Model tarayıcıda çalışır (int8 ONNX, 28 MB, Web Worker'da). Mac demosu: `python app.py` (Gradio), `--lan` ile aynı Wi-Fi'dan telefon.
 
@@ -33,13 +33,13 @@ Nutrition5k: 2472 train / 280 val (zaman gruplu) / 507 test; Food-101 alt kümes
 
 Diğer bulgular: en büyük hatalar yeşillik altına gizlenmiş proteinli yüksek kalorili tabaklar (Grad-CAM doğruluyor); balıklı tabaklar 1,7–1,9× kötü (etiket eksik); kardeş-sızıntısı ölçüldü, etkisi yok (`src/leakage.py`); modelin "yemek değil" çıkışı yok (telefon fotoğrafına 30 kcal dedi; sitede <50 kcal uyarısı var). Araştırma sorusunun cevabı: çok görevli öğrenme kaloriyi iyileştirmiyor ama aynı maliyetle kütle+makro veriyor.
 
-Hazır malzeme: `results/tablo1.md`, `tablo2.md`, `tablo3_kalori_araligi.md`, `tablo_ablation.md` (`python -m src.make_figures` yeniler), 21 figür `results/figures/` (eval_* ve EDA n5k_*/f101_*), `results/data_card_*.csv`, 39 makalelik literatür matrisi ekip arkadaşının Claude Docs belgesinde (README başlığındaki link; bu hesaptan okunamıyor, kullanıcıdan istenmeli).
+Hazır malzeme: `results/tablo1.md`, `tablo2.md`, `tablo3_kalori_araligi.md`, `tablo_ablation.md` (`python -m src.make_figures` yeniler), 22 figür `results/figures/` (eval_* final modellerle) (eval_* ve EDA n5k_*/f101_*), `results/data_card_*.csv`, 39 makalelik literatür matrisi ekip arkadaşının Claude Docs belgesinde (README başlığındaki link; bu hesaptan okunamıyor, kullanıcıdan istenmeli).
 
 ## 4. Bekleyenler (hepsi kullanıcı girdisine bağlı)
 
 1. ~~Notebook 13~~ ✅ 13 Kasım: Tablo 1'de ROC-AUC 0,997–0,998 (modelleri ayırmıyor, karşılaştırma F1 ile).
 2. **Adım 19, kendi fotoğraflar:** 15–20 tabak tam üstten (+5–6 yandan), gerçek kalori tartı/etiketle `own_photos/labels.csv`'ye (sütunlar `file,calories,angle(ust|yan),source,notes`). Sonra `python -m src.eval_own_photos --ckpt checkpoints/convnext_tiny_reg_mt.pt --model convnext_tiny_reg_mt` → `results.csv`'ye `own_photos*` satırları; README'ye sınırlılık bulgusu.
-3. **Adım 20, toparlama:** fotoğraf sonuçları girince README'yi rapora hazır hale getir (kod temiz; `ruff` yok, AST taraması yapıldı).
+3. **Adım 20, toparlama:** kod temizliği + figürlerin final modellerle yeniden üretilmesi ✅ (13 Kasım, `eval_roc.png` eklendi). Kalan: fotoğraf sonuçları girince README'nin rapor için son hali.
 4. **Rapor ve sunum (ekip yazar):** hocanın bölüm listesi ve bizdeki karşılıkları README §9'da. Sunum sırası hocanın "Sunum İçeriği" listesiyle aynı; demo adresi canlı. Teslim: rapor + kod + sunum → yapayzekaproje80@gmail.com; **teslim tarihi bilinmiyor**, kullanıcıya sorulmalı.
 5. Küçük: ekip arkadaşını GitHub'a ekle (kullanıcı adı lazım), Gemini anahtarını yenile, README §3 "Açık konular" (araştırma sorusu metni, iş bölümü).
 
@@ -47,7 +47,7 @@ Hazır malzeme: `results/tablo1.md`, `tablo2.md`, `tablo3_kalori_araligi.md`, `t
 
 ```
 cd ~/Desktop/kalori-tahmini && source .venv/bin/activate
-python -m pytest -q                                   # 63 test
+python -m pytest -q                                   # 64 test
 python -m src.make_figures                            # figürler + tablo md'leri
 python -m src.compare results/preds/a.csv results/preds/b.csv
 python -m src.leakage                                 # kardeş-sızıntısı

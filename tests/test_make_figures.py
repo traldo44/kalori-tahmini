@@ -114,11 +114,16 @@ def test_main_smoke_on_synthetic_data(tmp_path):
             ingr = ["ingr_1", "fish" if i % 5 == 0 else "rice", 100, c, 1, 1, 1]
             w.writerow([d, c, 150, 5, 20, 10] + ingr)
     _write_results(tmp_path / "results.csv", cls_models, reg_models)
+    (tmp_path / "probs").mkdir()
+    for m in ["vit_b16_384_cls", "convnext_tiny_cls"]:
+        probs = rng.dirichlet(np.ones(25), n_cls)
+        probs[np.arange(n_cls), y_true] += 1.0
+        np.savez(tmp_path / "probs" / f"{m}_test.npz", y_true=y_true, probs=probs / probs.sum(1, keepdims=True))
 
     captions = mf.main(["--results-dir", str(tmp_path), "--n5k-dir", str(tmp_path / "n5k")])
 
     names = {"eval_karisiklik_matrisi", "eval_sinif_f1", "eval_tahmin_gercek", "eval_hata_histogrami", "eval_aralik_mae",
-             "eval_model_karsilastirma", "eval_egitim_egrileri", "eval_en_kotu_tabaklar"}
+             "eval_model_karsilastirma", "eval_egitim_egrileri", "eval_en_kotu_tabaklar", "eval_roc"}
     assert {n for n, _ in captions} == names
     for n in names:
         assert (tmp_path / "figures" / f"{n}.png").stat().st_size > 1000
@@ -128,3 +133,15 @@ def test_main_smoke_on_synthetic_data(tmp_path):
     for name in ["tablo1.md", "tablo2.md", "tablo3_kalori_araligi.md"]:
         text = (tmp_path / name).read_text()
         assert text.startswith("| Tablo") and "," in text and "." not in text.split("\n")[2].split("|")[2]
+
+
+def test_macro_roc_matches_sklearn_macro_auc():
+    from sklearn.metrics import roc_auc_score
+    rng = np.random.default_rng(1)
+    y = np.repeat(np.arange(4), 30)
+    p = rng.dirichlet(np.ones(4), len(y))
+    p[np.arange(len(y)), y] += 0.3
+    p /= p.sum(1, keepdims=True)
+    curves, grid, mean_tpr, mauc = mf.macro_roc(y, p)
+    assert len(curves) == 4 and mean_tpr[0] == 0 and mean_tpr[-1] == pytest.approx(1)
+    assert mauc == pytest.approx(roc_auc_score(y, p, multi_class="ovr", average="macro"))

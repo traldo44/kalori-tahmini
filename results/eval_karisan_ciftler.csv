@@ -1,11 +1,11 @@
 true,pred,count
-apple pie,pancakes,7
-caesar salad,greek salad,7
 fried rice,risotto,7
+risotto,fried rice,7
+apple pie,pancakes,6
+hamburger,hot dog,6
 ice cream,apple pie,6
-lasagna,omelette,6
-pizza,lasagna,6
-risotto,fried rice,6
-spaghetti carbonara,spaghetti bolognese,6
+lasagna,apple pie,6
 apple pie,ice cream,5
-apple pie,waffles,5
+greek salad,caesar salad,5
+lasagna,omelette,5
+lasagna,pizza,5
