@@ -101,13 +101,15 @@ Hiperparametreler yalnızca val'de seçildi; test bir kez ölçüldü. Köşeli 
 
 Uçtan uca ince ayar, §6.1'deki ortak ayarlar (AdamW, omurga 1e-4 / başlık 1e-3, ısınma + cosine, val'e göre erken durdurma). Süre ölçümü T4'te, yalnızca model. Köşeli parantez: %95 bootstrap güven aralığı. Anlamlılık testleri `python -m src.compare` ile (eşleştirilmiş bootstrap).
 
-| Tablo 1 · Food-101 (test) | Doğruluk | Macro-F1 | Top-5 | Parametre | ms/görüntü |
-| --- | --- | --- | --- | --- | --- |
-| ResNet-50 (ince ayar) | %91,3 | 0,912 [0,905–0,919] | %99,0 | 23,6 M | 1,31 |
-| EfficientNet-B0 (ince ayar) | %91,7 | 0,917 [0,909–0,924] | %99,0 | 4,0 M | 0,70 |
-| ConvNeXt-T (ince ayar) | %94,1 | 0,941 [0,935–0,947] | %99,4 | 27,8 M | 1,49 |
-| ViT-B/16 (ince ayar) | %95,1 | 0,951 [0,945–0,956] | %99,3 | 85,8 M | 2,40 |
-| **ViT-B/16, 384 px (Adım 17)** | **%95,7** | **0,957** [0,952–0,962] | %99,4 | 86,1 M | 9,69 |
+| Tablo 1 · Food-101 (test) | Doğruluk | Macro-F1 | ROC-AUC | Top-5 | Parametre | ms/görüntü |
+| --- | --- | --- | --- | --- | --- | --- |
+| ResNet-50 (ince ayar) | %91,3 | 0,912 [0,905–0,919] | 0,997 | %99,0 | 23,6 M | 1,31 |
+| EfficientNet-B0 (ince ayar) | %91,7 | 0,917 [0,909–0,924] | 0,997 | %99,0 | 4,0 M | 0,70 |
+| ConvNeXt-T (ince ayar) | %94,1 | 0,941 [0,935–0,947] | 0,997 | %99,4 | 27,8 M | 1,49 |
+| ViT-B/16 (ince ayar) | %95,1 | 0,951 [0,945–0,956] | 0,997 | %99,3 | 85,8 M | 2,40 |
+| **ViT-B/16, 384 px (Adım 17)** | **%95,7** | **0,957** [0,952–0,962] | **0,998** | %99,4 | 86,1 M | 9,69 |
+
+ROC-AUC: makro ortalama, bire-karşı-hepsi (OvR), test olasılıklarından (`notebooks/13_roc_auc_kaggle.ipynb`, 13 Kasım; olasılıklar `results/probs/`). Yeniden değerlendirme ilk run'ların F1 değerlerini aynen tekrarladı. Beş model de 0,997–0,998'de: 25 sınıfta doğru sınıfı sıralamak hepsi için kolay, bu yüzden ROC-AUC modelleri ayırt etmiyor; karşılaştırmada Macro-F1 esas alınır, ROC-AUC hocanın şartı olarak raporlanır.
 
 | Tablo 2 · Nutrition5k (test) | MAE (kcal) | PMAE | R² | ±100 kcal içinde | Tablo 3 F1 | MAE balıksız / balıklı |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -171,7 +173,7 @@ Gemini 3.5 Flash-Lite, 512 px JPEG, sıcaklık 0, sabit prompt (kalemler + gram 
 
 ### Değerlendirme bulguları (Adım 15, `python -m src.make_figures` + `python -m src.gradcam`)
 
-Bütün figürler `results/preds/` ve `results/history/` dosyalarından üretilir; GPU ve checkpoint gerekmez (yalnızca Grad-CAM için `checkpoints/convnext_tiny_reg.pt`). Rapora yapıştırmaya hazır tablolar: `results/tablo1.md`, `tablo2.md` (precision/recall ve RMSE dahil), `tablo3_kalori_araligi.md` (ROC-AUC sütunuyla: final model 0,960, VLM 0,884, naif 0,500), `tablo_ablation.md` (Adım 17). Tablo 1'in ROC-AUC sütunu notebook 13'ten sonra dolar.
+Bütün figürler `results/preds/` ve `results/history/` dosyalarından üretilir; GPU ve checkpoint gerekmez (yalnızca Grad-CAM için `checkpoints/convnext_tiny_reg.pt`). Rapora yapıştırmaya hazır tablolar: `results/tablo1.md`, `tablo2.md` (precision/recall ve RMSE dahil), `tablo3_kalori_araligi.md` (ROC-AUC sütunuyla: final model 0,960, VLM 0,884, naif 0,500), `tablo_ablation.md` (Adım 17). Tablo 1'in ROC-AUC sütunu notebook 13 ile doldu (0,997–0,998).
 
 | Tablo 3 · Kalori aralığı (düşük < 116,1 ≤ orta < 313,7 ≤ yüksek kcal, test) | Doğruluk | Precision (macro) | Recall (macro) | Macro-F1 [%95 GA] |
 | --- | --- | --- | --- | --- |
@@ -290,14 +292,13 @@ Adımlar sırayla yapılır; her adımın bir çıktısı ve bir "bitti" kriteri
 | 19 | 9 | Demo: fotoğraf yükle → kcal (`app.py` iskeleti hazır) + kendi fotoğraflarımızla test (§7 Faz 4) | Çalışan demo, kısa bir video kaydı, `own_photos` satırları |
 | 20 | 9 | Toparlama: figürlerin son hali, kod temizliği, README | `main` dalında baştan sona çalışan kod. **Kontrol noktası 3** |
 
-**Durum (2 Kasım):** Adım 1–18 ✅ · Adım 19 web demosu ✅ yayında (fotoğraflar bekleniyor) · Adım 20 ⏳ · Teslim kuralları §9'da; ROC-AUC için notebook 13 ⏳ · Kontrol noktası 1 ✅ · Kontrol noktası 2 ✅
+**Durum (2 Kasım):** Adım 1–18 ✅ · Adım 19 web demosu ✅ yayında (fotoğraflar bekleniyor) · Adım 20 ⏳ · Teslim kuralları §9'da; ROC-AUC (notebook 13) ✅ 13 Kasım · Kontrol noktası 1 ✅ · Kontrol noktası 2 ✅
 
 **Adım 18 — final model (1 Kasım):** kalori için **ConvNeXt-T çok görevli** (`convnext_tiny_reg_mt`: 40,3 kcal; tek görevliyle fark anlamsız, kütle + makro çıktıları bedava), sınıflandırma için **ViT-B/16 384 px** (0,957; hız gerekiyorsa ConvNeXt-T 0,941 ile 6,5 kat hızlı). Final test ölçümleri `results.csv`'de (Adım 17 satırları, yeniden ölçüm gerekmedi: test bir kez, Kaggle'da ölçüldü); özet §1'de, "Bu çalışma" satırı §2 Hedeflerimiz'de. Checkpoint `checkpoints/convnext_tiny_reg_mt.pt` Mac'te (git dışı; Release'ten `GH_TOKEN=$(gh auth token) python scripts/share_checkpoint.py download convnext_tiny_reg_mt.pt`). Demo (`python app.py`) bu modelle doğrulandı: kalori CSV'deki tahminle birebir, altta kütle ve makrolar görünüyor. Adım 15'teki figürler ve hata analizi tek görevli ConvNeXt-T içindir; iki modelin tahminleri %99,3 korelasyonlu, "en kötü 20" listesinin 17'si ortak, bu yüzden analiz final model için de geçerli ve figürler yeniden üretilmedi (ekip isterse `python -m src.make_figures --reg-model convnext_tiny_reg_mt --reg-second convnext_tiny_reg` ve `python -m src.gradcam --ckpt checkpoints/convnext_tiny_reg_mt.pt`).
 
 **Sıradaki adım:**
-0. **Notebook 13 (ROC-AUC, Kaggle, ~15 dk):** `notebooks/13_roc_auc_kaggle.ipynb` → Import → GPU T4 x2 + Internet + Secrets `GH_TOKEN` → Save & Run All. Tablo 1'e ROC-AUC sütununu doldurur (hocanın şartı, §9); bitince `python -m src.make_figures` ve README Tablo 1 güncellenir.
-1. **Adım 19 fotoğrafları** (tek eksik sizden): 15–20 tabak fotoğrafı + tartı (§7 Faz 4). Fotoğraflar `own_photos/` + `labels.csv`'ye konunca `python -m src.eval_own_photos --ckpt checkpoints/convnext_tiny_reg_mt.pt --model convnext_tiny_reg_mt` sonucu `results.csv`'ye `own_photos`, `own_photos_ust`, `own_photos_yan` satırları olarak yazar. Demo: `python app.py` (Mac'te) veya Vercel'deki statik sürüm (§7 "Web demosu"; Vercel projesini kullanıcı bağlar: Root Directory `web`).
-2. **Adım 20 — toparlama (kontrol noktası 3):** kod temizliği, figürlerin son hali, README'nin rapor için sadeleştirilmesi; `main` baştan sona çalışır durumda.
+0. **Adım 19 fotoğrafları** (tek eksik sizden): 15–20 tabak fotoğrafı + tartı (§7 Faz 4). Fotoğraflar `own_photos/` + `labels.csv`'ye konunca `python -m src.eval_own_photos --ckpt checkpoints/convnext_tiny_reg_mt.pt --model convnext_tiny_reg_mt` sonucu `results.csv`'ye `own_photos`, `own_photos_ust`, `own_photos_yan` satırları olarak yazar. Demo: `python app.py` (Mac'te) veya Vercel'deki statik sürüm (§7 "Web demosu"; Vercel projesini kullanıcı bağlar: Root Directory `web`).
+1. **Adım 20 — toparlama (kontrol noktası 3):** kod temizliği, figürlerin son hali, README'nin rapor için sadeleştirilmesi; `main` baştan sona çalışır durumda.
 
 ---
 
@@ -665,7 +666,7 @@ Kaynak: `Yapay_Zeka_Proje_Teslim_ve_Sunum_Kurallari.docx` (hoca, 2 Kasım). Tesl
 | Kullanılan algoritmalar ve neden | §2 kararlar, §7 Faz 3; klasik ML (SVM/RF/XGBoost/Ridge) + CNN/ViT (ResNet-50, EfficientNet-B0, ConvNeXt-T, ViT-B/16) + VLM | ✅ |
 | Veri seti: kaynak, boyut, sınıf dağılımı, tanımlayıcı istatistikler, grafikler | `results/data_card_*.csv`, EDA figürleri `results/figures/n5k_*.png`, `f101_*.png`, notebook 01–02; ortalama/medyan/mod kalori EDA'da | ✅ (mod için kalori histogramının tepe aralığı verilir) |
 | Model seçimi ve hiperparametreler | §6.1 ortak ayarlar, `results.csv` `config` sütunu (lr, batch, epoch, px, label smoothing), §2 ablation | ✅ |
-| Deneysel sonuçlar; sınıflandırmada Accuracy, Precision, Recall, F1, **ROC-AUC** | Tablo 1–3 (`results/tablo*.md`), figürler `eval_*.png`. ROC-AUC: Tablo 3 ✅ (kcal skorundan), **Tablo 1 ⏳** (`notebooks/13_roc_auc_kaggle.ipynb` Kaggle'da ~15 dk; olasılıklar kaydedilmemişti) | ⏳ notebook 13 |
+| Deneysel sonuçlar; sınıflandırmada Accuracy, Precision, Recall, F1, **ROC-AUC** | Tablo 1–3 (`results/tablo*.md`), figürler `eval_*.png`. ROC-AUC: Tablo 3 ✅ (kcal skorundan), Tablo 1 ✅ (notebook 13; tüm modeller 0,997–0,998) | ✅ |
 | Literatürle karşılaştırma | §2 "Hedeflerimiz" tablosu + "Bu çalışma" satırı; `eval_model_karsilastirma.png` | ✅ |
 | Genel değerlendirme, güçlü yönler, sınırlılıklar | §2 bulgular; sınırlılıklar: balıklı tabaklar, yeşillik altı protein, tek kafeterya/üst kamera, "yemek değil" çıkışı yok, kendi fotoğraf testi (Adım 19) | ✅ / Adım 19 fotoğrafları eksik |
 
@@ -681,6 +682,7 @@ Kaynak: `Yapay_Zeka_Proje_Teslim_ve_Sunum_Kurallari.docx` (hoca, 2 Kasım). Tesl
 
 | Tarih | Kim | Son tamamlanan adım | Yarım kalan iş / sıradaki adım | Notlar (değişen ayarlar, sorunlar) |
 | --- | --- | --- | --- | --- |
+| 2026-11-13 | traldo | Notebook 13 ✅ (Kaggle): 5 sınıflandırma modeli ROC-AUC ile yeniden değerlendirildi; Tablo 1'de ROC-AUC sütunu (0,997–0,998, ViT-384 0,998) | Adım 19 fotoğrafları · Adım 20 toparlama · rapor/sunum (ekip yazar) | F1'ler ilk run'larla birebir. ROC-AUC tavanda olduğu için modelleri ayırmıyor; karşılaştırma Macro-F1 ile. Olasılıklar `results/probs/*.npz` (~2 MB). İlk Kaggle denemesi push etmedi, ikincisi geçti |
 | 2026-11-02 | traldo | Hocanın teslim kuralları işlendi (§9); ROC-AUC eklendi: `metrics.macro_ovr_auc`, `bin_scores`, `results.csv`'ye `roc_auc` sütunu (33 calorie_bins satırı geri dolduruldu), Tablo 1/3'te sütun, `src/eval_cls.py`, notebook 13 | Notebook 13'ü Kaggle'da çalıştır (Tablo 1 ROC-AUC) · fotoğraflar · rapor/sunum (ekip yazar, YZ oranı ≤ %40) | Teslim: rapor + kod + sunum → yapayzekaproje80@gmail.com, tarih yok. Web demosu yayında: https://kalori-tahmini-web.vercel.app (Worker'da çıkarım, Cache API) |
 | 2026-11-01 | traldo | Adım 19 web demosu, Vercel sürümü ✅ (`web/`: tarayıcı içi ONNX, `scripts/export_onnx.py`) | kendi fotoğraflar · Adım 20 (README'yi rapora hazırla) | HF Gradio Space ücretsiz hesapta kapandı (402). Model int8 ONNX 28 MB, doğruluk kaybı yok (100 tabakta 39,9 → 40,0). Sayfa çerçevesiz HTML/JS, onnxruntime-web CDN; Gradio demosu (`app.py`) sade temayla yeniden tasarlandı, ikisi aynı sonuç kartını gösterir. `onnx`, `onnxruntime` requirements'a eklendi |
 | 2026-11-01 | traldo | Adım 19 web demosu ✅ (telefon uyumlu `app.py`, `demo_ornekleri/`, `space/`, `scripts/deploy_space.py`) | `python scripts/deploy_space.py` (kullanıcı; Claude'un yayınlaması engellendi) · kendi fotoğraflar · Adım 20 | Gradio 6: `sources=["upload","webcam"]`, arka kamera `WebcamOptions(constraints=facingMode environment)`; `--lan` aynı ağdan erişim; Space ücretsiz CPU, torch CPU wheel'i `space/requirements.txt`'te. `eval_own_photos` boş `labels.csv`'de artık açık hata veriyor |

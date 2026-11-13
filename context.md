@@ -37,7 +37,7 @@ Hazır malzeme: `results/tablo1.md`, `tablo2.md`, `tablo3_kalori_araligi.md`, `t
 
 ## 4. Bekleyenler (hepsi kullanıcı girdisine bağlı)
 
-1. **Notebook 13 (ROC-AUC, Kaggle, ~15 dk):** `notebooks/13_roc_auc_kaggle.ipynb` → Kaggle'a Import → GPU T4 x2 + Internet + Secrets `GH_TOKEN` → Save & Run All. Beş sınıflandırma modelini yeniden değerlendirip `results.csv`'ye `roc_auc`'lu satırlar ve `results/probs/*.npz` yazar, push eder. Bitince: `git pull`, `python -m src.make_figures`, README Tablo 1'e ROC-AUC sütunu, §10'a satır. Hocanın şartı (sınıflandırmada ROC-AUC).
+1. ~~Notebook 13~~ ✅ 13 Kasım: Tablo 1'de ROC-AUC 0,997–0,998 (modelleri ayırmıyor, karşılaştırma F1 ile).
 2. **Adım 19, kendi fotoğraflar:** 15–20 tabak tam üstten (+5–6 yandan), gerçek kalori tartı/etiketle `own_photos/labels.csv`'ye (sütunlar `file,calories,angle(ust|yan),source,notes`). Sonra `python -m src.eval_own_photos --ckpt checkpoints/convnext_tiny_reg_mt.pt --model convnext_tiny_reg_mt` → `results.csv`'ye `own_photos*` satırları; README'ye sınırlılık bulgusu.
 3. **Adım 20, toparlama:** fotoğraf sonuçları girince README'yi rapora hazır hale getir (kod temiz; `ruff` yok, AST taraması yapıldı).
 4. **Rapor ve sunum (ekip yazar):** hocanın bölüm listesi ve bizdeki karşılıkları README §9'da. Sunum sırası hocanın "Sunum İçeriği" listesiyle aynı; demo adresi canlı. Teslim: rapor + kod + sunum → yapayzekaproje80@gmail.com; **teslim tarihi bilinmiyor**, kullanıcıya sorulmalı.
