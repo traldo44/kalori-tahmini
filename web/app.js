@@ -131,6 +131,11 @@
 
   function etiket(kcal) { return kcal < ARALIK[0] ? "düşük kalorili" : kcal < ARALIK[1] ? "orta kalorili" : "yüksek kalorili"; }
 
+  function gunlukMetin(kcal) {
+    const h = window.Gunluk && window.Gunluk.hedefKcal();   // profil varsa kişisel hedef, yoksa 2000 kcal
+    return h ? `günlük hedefinin %${fmt(100 * kcal / h)}'i` : `günlük ${GUNLUK} kcal'e göre %${fmt(100 * kcal / GUNLUK)}`;
+  }
+
   function sonucYaz(p, ms) {
     const kcal = p[0];
     const enerji = MAKRO.map(([, i, f]) => p[i] * f), toplam = enerji.reduce((a, b) => a + b, 0) || 1;
@@ -139,12 +144,13 @@
         `<tr><td class="ad">${ad}</td><td class="deger">${fmt(p[i])} g</td><td class="cubuk"><div><span style="width:${Math.round(100 * enerji[k] / toplam)}%"></span></div></td></tr>`));
     sonuc.innerHTML =
       `<div class="kcal">${fmt(kcal)}<small>kcal</small></div>` +
-      `<div class="aralik">yaklaşık ${fmt(Math.max(kcal - TIPIK_HATA, 0))}–${fmt(kcal + TIPIK_HATA)} kcal arası · günlük ${GUNLUK} kcal'e göre %${fmt(100 * kcal / GUNLUK)}</div>` +
+      `<div class="aralik">yaklaşık ${fmt(Math.max(kcal - TIPIK_HATA, 0))}–${fmt(kcal + TIPIK_HATA)} kcal arası · ${gunlukMetin(kcal)}</div>` +
       `<span class="etiket">${etiket(kcal)}</span>` +
       `<table>${satirlar.join("")}</table>` +
       `<div class="not">Çubuklar enerjinin makrolara dağılımı (yağ 9, karbonhidrat ve protein 4 kcal/g); makrolardan hesaplanan enerji ≈ ${fmt(toplam)} kcal.</div>` +
       (kcal < 50 ? `<div class="not">Çok düşük değer: tabakta az yemek var ya da fotoğrafta yemek yok. Model yemek olmayan görüntülere de düşük bir sayı verir.</div>` : "") +
       `<div class="sure">Cihazda hesaplandı, ${fmt(ms)} ms.</div>`;
+    if (window.Gunluk) sonuc.appendChild(window.Gunluk.ekleKutusu(p));   // günlüğe ekle + porsiyon (gunluk.js)
     sonuc.hidden = false; bos.hidden = true;
   }
 
