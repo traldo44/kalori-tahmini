@@ -4,84 +4,136 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#f6f5f2" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#161615" media="(prefers-color-scheme: dark)">
-<title>Kalori tahmini</title>
-<meta name="description" content="Tabağın üstten fotoğrafından kalori, porsiyon ve makro tahmini. Model tarayıcıda çalışır; fotoğraf hiçbir sunucuya gönderilmez.">
+<meta name="theme-color" content="#f2f5f1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121a15" media="(prefers-color-scheme: dark)">
+<title>NeYedim — kalori ve öğün takibi</title>
+<meta name="description" content="Tabağının fotoğrafını çek, kalorisini ve makrolarını gör, öğünlerini ve beslenme alışkanlıklarını takip et. Model telefonunda çalışır; fotoğraf hiçbir yere gönderilmez.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&display=swap">
 <link rel="stylesheet" href="style.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='none' stroke='%23444' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%23444' stroke-width='2'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23fff' stroke='%232e6b4f' stroke-width='2.5'/%3E%3Ccircle cx='16' cy='16' r='8' fill='none' stroke='%23e2412f' stroke-width='3'/%3E%3C/svg%3E">
 </head>
 <body>
-<main>
-  <header>
-    <h1>Kalori tahmini</h1>
-    <p>Tabağın üstten fotoğrafından kalori, porsiyon ve makro tahmini. Model telefonunuzda çalışır; fotoğraf hiçbir yere gönderilmez. İlk açılışta 28 MB'lık model bir kez iner.</p>
-  </header>
+<div class="kabuk">
 
-  <section id="bugun" class="bugun-kart" aria-label="Bugünkü özet" aria-live="polite"></section>
+  <nav class="menu" aria-label="Bölümler">
+    <a class="marka" href="#bugun" aria-label="NeYedim, ana sayfa">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" class="m-tabak"/><circle cx="16" cy="16" r="8" class="m-ic"/></svg>
+      <span>NeYedim</span>
+    </a>
+    <a href="#bugun" data-sekme="bugun"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4"/></svg><span>Bugün</span></a>
+    <a href="#ekle" data-sekme="ekle" class="kamera-sekme"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5h3l1.6-2.5h6.8L17 8.5h3v10H4z"/><circle cx="12" cy="13.3" r="3.3"/></svg><span>Yemek ekle</span></a>
+    <a href="#aliskanlik" data-sekme="aliskanlik"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V11M10 19V6M15 19v-5M20 19V9"/></svg><span>Alışkanlıklar</span></a>
+    <a href="#profil" data-sekme="profil"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 19.5c1.2-3.6 4-5 7-5s5.8 1.4 7 5"/></svg><span>Hedefim</span></a>
+  </nav>
 
-  <section class="giris" aria-label="Fotoğraf seç">
-    <button type="button" class="buton birincil" id="kamera-dugme">Fotoğraf çek</button>
-    <button type="button" class="buton" id="galeri-dugme">Galeriden seç</button>
-    <input type="file" accept="image/*" capture="environment" id="kamera" class="gizli" tabindex="-1" aria-hidden="true">
-    <input type="file" accept="image/*" id="galeri" class="gizli" tabindex="-1" aria-hidden="true">
-  </section>
+  <main>
+    <!-- BUGÜN -->
+    <section id="bugun" class="panel" data-panel="bugun" aria-labelledby="bugun-baslik">
+      <header class="panel-bas">
+        <div>
+          <p class="tarih" id="bugun-tarih"></p>
+          <h1 id="bugun-baslik">Bugünün tabağı</h1>
+        </div>
+        <div id="seri" class="seri" role="status"></div>
+      </header>
+      <div id="bugun-icerik" class="bugun-izgara" aria-live="polite"></div>
+    </section>
 
-  <p id="durum" class="durum" aria-live="polite">Model hazırlanıyor…</p>
+    <!-- EKLE -->
+    <section id="ekle" class="panel" data-panel="ekle" aria-labelledby="ekle-baslik" hidden>
+      <header class="panel-bas">
+        <div>
+          <h1 id="ekle-baslik">Yemek ekle</h1>
+          <p class="alt">Tabağı üstten çek; kalori, porsiyon ve makroları telefonun hesaplasın.</p>
+        </div>
+      </header>
+      <div class="ekle-izgara">
+        <div class="ekle-ana">
+          <div class="cek">
+            <button type="button" class="buton birincil buyuk" id="kamera-dugme">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8.5h3l1.6-2.5h6.8L17 8.5h3v10H4z"/><circle cx="12" cy="13.3" r="3.3"/></svg>
+              Fotoğraf çek
+            </button>
+            <button type="button" class="buton" id="galeri-dugme">Galeriden seç</button>
+            <input type="file" accept="image/*" capture="environment" id="kamera" class="gizli" tabindex="-1" aria-hidden="true">
+            <input type="file" accept="image/*" id="galeri" class="gizli" tabindex="-1" aria-hidden="true">
+          </div>
+          <p id="durum" class="durum" aria-live="polite">Model hazırlanıyor…</p>
 
-  <section id="onizleme" class="onizleme" hidden>
-    <canvas id="kirpma" width="448" height="336" aria-label="Modelin gördüğü, 4:3 kırpılmış görüntü"></canvas>
-    <p class="kucuk">Modelin gördüğü (4:3 kırpma, 224 px'e küçültülür). Tabağın kenarı kesiliyorsa biraz uzaktan çekin.</p>
-  </section>
+          <figure id="onizleme" class="onizleme" hidden>
+            <canvas id="kirpma" width="448" height="336" aria-label="Modelin gördüğü kırpılmış fotoğraf"></canvas>
+            <figcaption>Modelin gördüğü kısım. Tabağın kenarı kesiliyorsa biraz uzaktan çek.</figcaption>
+          </figure>
 
-  <section id="sonuc" class="sonuc" hidden aria-live="polite"></section>
+          <section id="sonuc" class="sonuc" hidden aria-live="polite"></section>
 
-  <section id="bos" class="bos">
-    <strong>Nasıl çekilir?</strong>
-    <ol>
-      <li>Tabağı tam üstten, kuş bakışı çekin; yandan değil.</li>
-      <li>Tabak karenin yarısı ile üçte ikisi arasını doldursun.</li>
-      <li>Tek tabak, düz zemin, gölgesiz ışık.</li>
-    </ol>
-    Model bu koşullardaki tabaklarla eğitildi; yandan veya çok yakından çekimde sapma büyür.
-  </section>
+          <section id="bos" class="ipucu">
+            <h2>İyi bir tahmin için</h2>
+            <ul>
+              <li><b>Tam üstten</b> çek, yandan değil.</li>
+              <li>Tabak karenin <b>yarısı ile üçte ikisi</b> arasını doldursun.</li>
+              <li><b>Tek tabak</b>, düz zemin, gölgesiz ışık.</li>
+            </ul>
+          </section>
+        </div>
 
-  <section class="ornekler" aria-label="Örnek tabaklar">
-    <h2>Denemek için örnek tabaklar</h2>
-    <div id="ornek-liste" class="ornek-liste"></div>
-    <p class="kucuk">Nutrition5k test kümesinden; gerçek değerler aşağıda.</p>
-  </section>
+        <aside class="ornekler" aria-labelledby="ornek-baslik">
+          <h2 id="ornek-baslik">Fotoğrafın yoksa bir örnekle dene</h2>
+          <div id="ornek-liste" class="ornek-liste"></div>
+          <details class="katla">
+            <summary>Örneklerin gerçek değerleri</summary>
+            <table id="ornek-tablo" class="tablo"><thead><tr><th>Örnek</th><th>Gerçek</th><th>Model</th></tr></thead><tbody></tbody></table>
+          </details>
+        </aside>
+      </div>
+    </section>
 
-  <details id="profil" class="profil-kart"></details>
+    <!-- ALIŞKANLIKLAR -->
+    <section id="aliskanlik" class="panel" data-panel="aliskanlik" aria-labelledby="aliskanlik-baslik" hidden>
+      <header class="panel-bas">
+        <div>
+          <h1 id="aliskanlik-baslik">Alışkanlıkların</h1>
+          <p class="alt">Son 7 günde ne zaman, ne kadar ve nasıl yediğin.</p>
+        </div>
+      </header>
+      <div id="aliskanlik-icerik"></div>
+    </section>
 
-  <details>
-    <summary>Örneklerin gerçek değerleri</summary>
-    <table id="ornek-tablo" class="tablo"><thead><tr><th>Örnek</th><th>Gerçek</th><th>Model (sunucu)</th></tr></thead><tbody></tbody></table>
-  </details>
-
-  <details>
-    <summary>Sınırlılıklar</summary>
-    <p>Model, Nutrition5k veri setindeki 2 752 tabakla eğitildi: tek bir kafeterya, sabit yükseklikte üst kamera, tabak başına tartılmış malzeme listesinden hesaplanan kalori. Telefon fotoğrafı bu koşullardan uzaklaştıkça (yandan açı, farklı mesafe, birden fazla tabak, paketli ürün) hata büyür.</p>
-    <p>Model "bu yemek değil" diyemez: her fotoğrafa bir sayı verir. Yemek olmayan görüntülerde (telefon, masa, boş tabak) genellikle 0–50 kcal gibi düşük bir değer çıkar; bu bir ölçüm değil, modelin "neredeyse boş tabak" yorumudur.</p>
-    <p>Sonuç bir tahmindir: test kümesinde ortalama hata ±40 kcal; yüksek kalorili tabaklarda daha büyük. Tahminler bilgilendirme amaçlıdır; tıbbi veya diyet kararı için kullanılmaz.</p>
-  </details>
-
-  <details>
-    <summary>Model ve sonuçlar</summary>
-    <table class="tablo iki">
-      <tr><th>Model</th><td>ConvNeXt-T omurgası (ImageNet-12k ön eğitimli), çok görevli başlık: kalori, kütle, yağ, karbonhidrat, protein</td></tr>
-      <tr><th>Girdi</th><td>Yalnızca RGB fotoğraf, 224 px</td></tr>
-      <tr><th>Eğitim</th><td>Nutrition5k, 2 752 tabak (üst kamera)</td></tr>
-      <tr><th>Test, 507 tabak</th><td>MAE 40,3 kcal [%95 GA 36,2–45,3], PMAE %15,8, R² 0,90; tahminlerin %88'i ±100 kcal içinde</td></tr>
-      <tr><th>Karşılaştırma</th><td>Sıfır-atış VLM (Gemini 3.5 Flash-Lite) 82,1 kcal · klasik ML (donmuş ResNet-50 → XGBoost) 77,4 · Nutrition5k makalesi RGB 70,6</td></tr>
-      <tr><th>Bu sayfa</th><td id="model-bilgi">Model int8 ONNX olarak tarayıcıda (onnxruntime-web) çalışır.</td></tr>
-    </table>
-  </details>
-
-  <footer>
-    Bitirme projesi, 2026. <a href="https://github.com/traldo44/kalori-tahmini">Kaynak kod ve rapor</a>
-  </footer>
-</main>
+    <!-- HEDEFİM -->
+    <section id="profil" class="panel" data-panel="profil" aria-labelledby="profil-baslik" hidden>
+      <header class="panel-bas">
+        <div>
+          <h1 id="profil-baslik">Hedefim</h1>
+          <p class="alt">Günlük kalori ve makro ihtiyacını bu bilgilerle hesaplıyoruz. Hepsi yalnızca bu cihazda kalır.</p>
+        </div>
+      </header>
+      <div class="profil-izgara">
+        <div id="profil-form-kutu" class="kart"></div>
+        <div class="bilgi">
+          <details class="katla">
+            <summary>Model nasıl çalışıyor?</summary>
+            <table class="tablo iki">
+              <tr><th>Model</th><td>ConvNeXt-T (ImageNet ön eğitimli), çok görevli: kalori, kütle, yağ, karbonhidrat, protein</td></tr>
+              <tr><th>Eğitim</th><td>Nutrition5k, 2 752 tabak, üst kamera</td></tr>
+              <tr><th>Test</th><td>507 tabakta ortalama hata 40,3 kcal; tahminlerin %88'i ±100 kcal içinde</td></tr>
+              <tr><th>Karşılaştırma</th><td>Gemini 3.5 Flash-Lite 82,1 kcal · klasik ML 77,4 kcal</td></tr>
+              <tr><th>Bu sayfa</th><td id="model-bilgi">Model tarayıcıda çalışır (onnxruntime-web).</td></tr>
+            </table>
+          </details>
+          <details class="katla">
+            <summary>Sınırlılıklar</summary>
+            <p>Model tek bir kafeteryanın üstten çekilmiş tabaklarıyla eğitildi. Yandan çekim, birden fazla tabak ya da paketli ürünlerde hata büyür.</p>
+            <p>Model "bu yemek değil" diyemez; yemek olmayan fotoğraflara da düşük bir sayı verir.</p>
+            <p>Sonuçlar tahmindir, ortalama ±40 kcal sapar. Tıbbi veya diyet kararı için kullanma.</p>
+          </details>
+          <p class="dipnot">Yapay zekâ projesi, 2026. <a href="https://github.com/traldo44/kalori-tahmini">Kaynak kod ve rapor</a></p>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
 
 <script src="gunluk.js"></script>
 <script src="app.js"></script>
