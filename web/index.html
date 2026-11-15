@@ -18,6 +18,8 @@
     <p>Tabağın üstten fotoğrafından kalori, porsiyon ve makro tahmini. Model telefonunuzda çalışır; fotoğraf hiçbir yere gönderilmez. İlk açılışta 28 MB'lık model bir kez iner.</p>
   </header>
 
+  <section id="bugun" class="bugun-kart" aria-label="Bugünkü özet" aria-live="polite"></section>
+
   <section class="giris" aria-label="Fotoğraf seç">
     <button type="button" class="buton birincil" id="kamera-dugme">Fotoğraf çek</button>
     <button type="button" class="buton" id="galeri-dugme">Galeriden seç</button>
@@ -50,6 +52,8 @@
     <p class="kucuk">Nutrition5k test kümesinden; gerçek değerler aşağıda.</p>
   </section>
 
+  <details id="profil" class="profil-kart"></details>
+
   <details>
     <summary>Örneklerin gerçek değerleri</summary>
     <table id="ornek-tablo" class="tablo"><thead><tr><th>Örnek</th><th>Gerçek</th><th>Model (sunucu)</th></tr></thead><tbody></tbody></table>
@@ -79,6 +83,7 @@
   </footer>
 </main>
 
+<script src="gunluk.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
