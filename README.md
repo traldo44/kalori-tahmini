@@ -1,8 +1,27 @@
-# Yemek Fotoğrafından Kalori Tahmini — Proje Durumu ve Geliştirici Rehberi
+# Yemek Fotoğrafından Kalori Tahmini
 
-> **Son güncelleme:** 28 Ekim 2026 (repo kuruldu, Adım 1–4 tamam; ayrıntı §3 ve §10)
+Üstten çekilmiş tek bir yemek fotoğrafından kalori, kütle ve makro besin değerlerini tahmin eden derin öğrenme projesi. Model tarayıcıda çalışır; fotoğraf sunucuya gönderilmez.
+
+**[Canlı demo](https://ne-yedim-web.vercel.app/)** · [Sonuçlar](#2-bugüne-kadar-alınan-kararlar) · [Kurulum](#5-gün-1--kurulum-ayrıntıları-adım-15)
+
+| Görev | Model | Veri seti | Test sonucu |
+| --- | --- | --- | --- |
+| Kalori tahmini | ConvNeXt-T, çok görevli | Nutrition5k (507 tabak) | **MAE 40,3 kcal**, PMAE %15,8, R² 0,90 |
+| Yemek türü | ViT-B/16, 384 px | Food-101 (25 sınıf) | **macro-F1 0,957**, doğruluk %95,7 |
+| Kalori aralığı | ConvNeXt-T, çok görevli | Nutrition5k | F1 0,869, ROC-AUC 0,960 |
+
+- **Karşılaştırma:** Klasik makine öğrenmesi, CNN ve Transformer modelleri, sıfır-atış görü-dil modeli ve literatür sonuçları.
+- **Değerlendirme:** %95 bootstrap güven aralıkları, eşleştirilmiş model karşılaştırması, ablation ve Grad-CAM analizi.
+- **Demo:** Tarayıcıda çalışan int8 ONNX modeli ve öğün günlüğü (`web/`), ayrıca Gradio arayüzü (`app.py`).
+- **Teknolojiler:** Python 3.12, PyTorch, timm, scikit-learn, XGBoost, ONNX Runtime Web, Gradio.
+
+Tahminler bilgilendirme amaçlıdır; tıbbi veya diyet tavsiyesi yerine geçmez.
+
+---
+
+# Proje Durumu ve Geliştirici Rehberi
+
 > **Kime:** Geliştirmeyi devralan ve kaldığı yerden sürdürecek kişi
-> **Ayrıntılı yol haritası ve 39 makalelik literatür matrisi:** Proje yol haritası belgesi. Belge size paylaşılmadıysa proje sahibinden isteyin.
 
 Bu dosyayı okuyan biri, başka kaynağa bakmadan projenin ne olduğunu, nerede olduğumuzu ve sıradaki adımın ne olduğunu anlayabilmeli. Geliştirme tek bir sıralı akış olarak ilerler (§4). Çalışmayı bıraktığınızda **§3 Durum** tablosunu güncelleyin ve **§10 Devir günlüğü**ne kaldığınız yeri yazın; sonraki kişi oradan devam eder.
 
